@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SignInView: View {
     var body: some View {
-        NavigationView {  // Wrap the entire content in NavigationView
+        NavigationView {
             VStack {
                 Spacer()
 
@@ -38,9 +38,14 @@ struct SignInView: View {
 
                 HStack {
                     Spacer()
-                    Text("Forgot Password?")
-                        .font(.caption)
-                        .foregroundColor(.yellow)
+                    NavigationLink(destination: ForgotPasswordView()) { // Navigate to ForgotPasswordView
+                        NavigationLink(destination: ForgotPasswordView()) {
+                            Text("Forgot Password?")
+                                .font(.caption)
+                                .foregroundColor(.yellow)
+                        }
+
+                    }
                 }
                 .padding(.horizontal)
 
@@ -62,7 +67,7 @@ struct SignInView: View {
                     .padding(.top, 30)
 
                 HStack(spacing: 20) {
-                    Image(systemName: "applepic")
+                    Image(systemName: "appleeeeeee")
                         .resizable()
                         .frame(width: 30, height: 30)
                         .foregroundColor(.white)
@@ -77,7 +82,7 @@ struct SignInView: View {
                 HStack {
                     Text("Don't have an account?")
                         .foregroundColor(.white)
-                    NavigationLink("Sign up", destination: SignUpView()) // Corrected NavigationLink placement
+                    NavigationLink("Sign up", destination: SignUpView())
                         .foregroundColor(.yellow)
                 }
                 .padding(.bottom, 10)
