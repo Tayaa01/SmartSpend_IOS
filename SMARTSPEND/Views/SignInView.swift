@@ -1,94 +1,178 @@
 import SwiftUI
 
 struct SignInView: View {
+    @State var username: String = ""
+    @State var password: String = ""
+    @State private var errorMessage: String?
+    @State private var successMessage: String?
+    @State private var navigateToHome: Bool = false // Navigation state
+
     var body: some View {
         NavigationView {
             VStack {
                 Spacer()
 
+                // Logo
                 Image("tnd")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
+                    .padding(.bottom, 10)
 
+                // Title
                 Text("SmartSpend")
-                    .font(.title)
-                    .foregroundColor(.white)
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.purple)
+                    .padding(.bottom, 5)
 
-                Text("Sign In")
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(.yellow)
-                    .padding(.top, 20)
+                // Subtitle
+                Text("Sign In to continue")
+                    .font(.title3)
+                    .foregroundColor(Color.gray)
+                    .padding(.bottom, 20)
 
+                // Input Fields
                 VStack(spacing: 15) {
-                    TextField("Email", text: .constant(""))
+                    TextField("Email", text: $username)
                         .padding()
-                        .background(Color.gray.opacity(0.2))
+                        .background(Color.gray.opacity(0.1))
                         .cornerRadius(10)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
 
-                    SecureField("Password", text: .constant(""))
+                    SecureField("Password", text:  $password)
                         .padding()
-                        .background(Color.gray.opacity(0.2))
+                        .background(Color.gray.opacity(0.1))
                         .cornerRadius(10)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
                 }
-                .padding()
+                .padding(.horizontal, 20)
 
+                // Error Message
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                }
+
+                // Success Message
+                if let successMessage = successMessage {
+                    Text(successMessage)
+                        .foregroundColor(.green)
+                        .padding()
+                }
+
+                // Forgot Password Link
                 HStack {
                     Spacer()
-                    NavigationLink(destination: ForgotPasswordView()) { // Navigate to ForgotPasswordView
-                        NavigationLink(destination: ForgotPasswordView()) {
-                            Text("Forgot Password?")
-                                .font(.caption)
-                                .foregroundColor(.yellow)
-                        }
-
+                    NavigationLink(destination: ForgotPasswordView()) {
+                        Text("Forgot Password?")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.purple)
                     }
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
 
+                // Sign-In Button
                 Button(action: {
-                    // Handle Sign-In Action
+                    signIn()
                 }) {
                     Text("Sign in")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.yellow)
-                        .foregroundColor(.black)
-                        .cornerRadius(10)
-                }
-                .padding(.horizontal)
-                .padding(.top)
-
-                Text("Or sign in with")
-                    .foregroundColor(.white)
-                    .padding(.top, 30)
-
-                HStack(spacing: 20) {
-                    Image(systemName: "appleeeeeee")
-                        .resizable()
-                        .frame(width: 30, height: 30)
+                        .background(Color.purple)
                         .foregroundColor(.white)
-
-                    Image("googlepic") // Replace with your Google icon
-                        .resizable()
-                        .frame(width: 30, height: 30)
+                        .cornerRadius(10)
+                        .font(.headline)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
 
                 Spacer()
 
+                // Sign-Up Link
                 HStack {
                     Text("Don't have an account?")
-                        .foregroundColor(.white)
+                        .foregroundColor(.gray)
                     NavigationLink("Sign up", destination: SignUpView())
-                        .foregroundColor(.yellow)
+                        .foregroundColor(.purple)
+                        .fontWeight(.bold)
                 }
-                .padding(.bottom, 10)
+                .padding(.bottom, 20)
             }
-            .background(Color.black.ignoresSafeArea())
+            .background(Color.white.ignoresSafeArea())
+            .background(
+                NavigationLink(
+                    destination: MainView(),
+                    isActive: $navigateToHome,
+                    label: { EmptyView() }
+                )
+            )
         }
+    }
+
+    // Sign In Function
+    private func signIn() {
+        // Validate the input fields
+        guard !username.isEmpty, !password.isEmpty else {
+            errorMessage = "Please fill in all fields."
+            return
+        }
+
+        // Create the request URL
+        let url = URL(string: "http://localhost:3005/auth/login")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Create the request body
+        let body: [String: Any] = [
+            "email": username,
+            "password": password
+        ]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+
+        // Perform the request
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            // Handle errors
+            if let error = error {
+                DispatchQueue.main.async {
+                    errorMessage = "Failed to sign in: \(error.localizedDescription)"
+                }
+                return
+            }
+
+            // Handle HTTP response
+            guard let httpResponse = response as? HTTPURLResponse else {
+                DispatchQueue.main.async {
+                    errorMessage = "No response from server."
+                }
+                return
+            }
+
+            DispatchQueue.main.async {
+                if httpResponse.statusCode == 201 {
+                    // Success, navigate to Home screen
+                    successMessage = "Successfully logged in!"
+                    errorMessage = nil // Clear error message
+                    navigateToHome = true // Trigger navigation
+                } else {
+                    // Invalid login credentials or other issues
+                    errorMessage = "Invalid credentials. Please try again."
+                    successMessage = nil // Clear success message
+                }
+            }
+        }.resume()
     }
 }
 
