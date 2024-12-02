@@ -130,7 +130,7 @@ struct SignInView: View {
         }
 
         // Create the request URL
-        let url = URL(string: "http://localhost:3005/auth/login")!
+        let url = URL(string: "http://localhost:3000/auth/login")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -161,11 +161,27 @@ struct SignInView: View {
             }
 
             DispatchQueue.main.async {
-                if httpResponse.statusCode == 201 {
-                    // Success, navigate to Home screen
-                    successMessage = "Successfully logged in!"
-                    errorMessage = nil // Clear error message
-                    navigateToHome = true // Trigger navigation
+                if httpResponse.statusCode == 201, let data = data {
+                    // Parse the token from the response (assuming it's in the body as a JSON response)
+                    do {
+                        if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                           let token = jsonResponse["access_token"] as? String {
+                            // Save the token locally in UserDefaults
+                            UserDefaults.standard.setValue(token, forKey: "access_token")
+                            let ttt = UserDefaults.standard.string(forKey: "access_token")
+                            print("Successfully logged in! Token: \(ttt)")
+
+
+                            // Success, navigate to Home screen
+                            successMessage = "Successfully logged in!"
+                            errorMessage = nil // Clear error message
+                            navigateToHome = true // Trigger navigation
+                        } else {
+                            errorMessage = "Failed to retrieve token."
+                        }
+                    } catch {
+                        errorMessage = "Failed to parse response."
+                    }
                 } else {
                     // Invalid login credentials or other issues
                     errorMessage = "Invalid credentials. Please try again."
@@ -174,6 +190,7 @@ struct SignInView: View {
             }
         }.resume()
     }
+
 }
 
 struct SignInView_Previews: PreviewProvider {

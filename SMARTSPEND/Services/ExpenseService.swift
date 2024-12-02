@@ -8,7 +8,7 @@ class ExpenseService {
     
    
     // Fonction pour ajouter une dépense ou un revenu
-    func addExpenseOrIncome(data: ExpenseOrIncome, token: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func addExpenseOrIncome(data: Expense, token: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/expense") else { return }
         
         var request = URLRequest(url: url)

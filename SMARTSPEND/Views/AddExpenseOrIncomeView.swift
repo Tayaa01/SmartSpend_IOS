@@ -49,18 +49,6 @@ struct AddExpenseOrIncomeView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
 
-                Button(action: addExpenseOrIncome) {
-                    if isSubmitting {
-                        ProgressView()
-                    } else {
-                        Text("Add \(type)")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.purple)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                }
                 .padding(.top)
 
                 if let errorMessage = errorMessage {
@@ -75,35 +63,4 @@ struct AddExpenseOrIncomeView: View {
         }
     }
 
-    private func addExpenseOrIncome() {
-        // Validation de l'input
-        guard let amountValue = Double(amount), !description.isEmpty, !category.isEmpty else {
-            errorMessage = "Please fill in all fields correctly."
-            return
-        }
-        
-        // Préparer l'objet à envoyer
-        let expenseOrIncome = ExpenseOrIncome(amount: amountValue, description: description, category: category, type: type)
-
-        // Remplacer "your_token" par le token de l'utilisateur
-        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
-            errorMessage = "You need to be logged in."
-            return
-        }
-
-        isSubmitting = true
-        ExpenseService.shared.addExpenseOrIncome(data: expenseOrIncome, token: token) { result in
-            DispatchQueue.main.async {
-                isSubmitting = false
-                switch result {
-                case .success:
-                    // Si la requête réussit, on ferme la vue
-                    print("\(type) added successfully!")
-                    // Vous pouvez ajouter ici du code pour fermer la vue ou afficher une confirmation
-                case .failure(let error):
-                    errorMessage = "Failed to add \(type): \(error.localizedDescription)"
-                }
-            }
-        }
-    }
 }

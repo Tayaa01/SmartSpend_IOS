@@ -2,7 +2,6 @@ import SwiftUI
 
 struct MainView: View {
     var body: some View {
-        // Envelopper TabView dans un NavigationView pour éviter les conflits
         NavigationView {
             TabView {
                 // Onglet Home
@@ -24,13 +23,13 @@ struct MainView: View {
                     }
 
                 // Onglet Settings
-                SettingsView()
+                settingsView()
                     .tabItem {
                         Label("Settings", systemImage: "gearshape.fill")
                     }
             }
-            .accentColor(.purple) // Personnalise la couleur de l'onglet sélectionné
-            .navigationTitle("Main View") // Titre global de la navigation
+            .accentColor(.purple)
+            
             .navigationBarItems(leading: ProfileButton())
         }
     }
@@ -83,98 +82,48 @@ struct ProfileView: View {
 
 // Vue HomeView
 struct HomeView: View {
+    @StateObject private var viewModel = ExpensesViewModel()
     @State private var showAddExpenseOrIncome: Bool = false
-
-    let expenses = [("Groceries", 50.0), ("Transport", 20.0), ("Utilities", 30.0)]
-    let incomes = [("Salary", 1500.0), ("Freelance", 500.0), ("Gift", 200.0)]
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Carte pour le solde
-                VStack {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Balance")
-                                .font(.subheadline)
-                                .foregroundColor(.white)
-                            Text("$2000.00")
-                                .font(.title)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                        }
-                        Spacer()
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Expense")
-                                .font(.subheadline)
-                                .foregroundColor(.white)
-                            Text("-$100.00")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                        }
-                        Spacer()
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Income")
-                                .font(.subheadline)
-                                .foregroundColor(.white)
-                            Text("$2000.00")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .padding()
-                    .background(Color.purple)
-                    .cornerRadius(15)
-                }
-                .padding(.horizontal)
-
-                // Dernières dépenses
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Last 3 Expenses")
-                        .font(.headline)
-                        .foregroundColor(.purple)
-                    ForEach(expenses.prefix(3), id: \.0) { expense in
-                        HStack {
-                            Text(expense.0)
-                                .font(.subheadline)
-                                .foregroundColor(.black)
-                            Spacer()
-                            Text("$\(expense.1, specifier: "%.2f")")
-                                .font(.subheadline)
-                                .foregroundColor(.black)
-                        }
+                // Loading State
+                if viewModel.isLoading {
+                    ProgressView("Loading expenses...")
+                        .progressViewStyle(CircularProgressViewStyle())
                         .padding()
-                    }
-                    NavigationLink("View All", destination: Text("All Expenses"))
-                        .foregroundColor(.purple)
-                        .padding(.bottom, 10)
-                }
-                .padding(.horizontal)
-
-                // Derniers revenus
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Last 3 Incomes")
-                        .font(.headline)
-                        .foregroundColor(.purple)
-                    ForEach(incomes.prefix(3), id: \.0) { income in
-                        HStack {
-                            Text(income.0)
-                                .font(.subheadline)
-                                .foregroundColor(.black)
-                            Spacer()
-                            Text("$\(income.1, specifier: "%.2f")")
-                                .font(.subheadline)
-                                .foregroundColor(.black)
-                        }
+                } else if let errorMessage = viewModel.errorMessage {
+                    // Error Message
+                    Text(errorMessage)
+                        .foregroundColor(.red)
                         .padding()
+                } else {
+                    // Expenses List
+                    VStack(alignment: .leading, spacing: 15) {
+                        Text("Last 3 Expenses")
+                            .font(.headline)
+                            .foregroundColor(.purple)
+                            .padding(.top)
+
+                        ForEach(viewModel.expenses.prefix(3)) { expense in
+                            ExpenseCard(expense: expense)
+                        }
+
+                        NavigationLink("View All", destination: Text("All Expenses"))
+                            .foregroundColor(.purple)
+                            .padding(.bottom, 10)
                     }
-                    NavigationLink("View All", destination: Text("All Incomes"))
-                        .foregroundColor(.purple)
-                        .padding(.bottom, 10)
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
+            }
+        }
+        .onAppear {
+            if let token = UserDefaults.standard.string(forKey: "access_token") {
+                viewModel.fetchExpenses(token: token)
+            } else {
+                viewModel.errorMessage = "User not logged in."
+                viewModel.isLoading = false
             }
         }
         .overlay(
@@ -198,6 +147,66 @@ struct HomeView: View {
         .sheet(isPresented: $showAddExpenseOrIncome) {
             AddExpenseView()
         }
+    }
+}
+
+// Carte de dépense
+struct ExpenseCard: View {
+    var expense: Expense
+    
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // Format année-mois-jour
+        return formatter
+    }
+
+    private func formattedDate(from string: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // Assurez-vous que la date soit dans ce format
+        
+        if let date = formatter.date(from: string) {
+            return dateFormatter.string(from: date)  // Retourne la date formatée
+        }
+        return string  // Si la conversion échoue, retourne la chaîne d'origine
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(expense.description)
+                    .font(.headline)
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                
+                Spacer()
+
+                Text("$\(expense.amount, specifier: "%.2f")")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.green)
+            }
+            .padding()
+            
+            Divider()
+
+            HStack {
+                Text("Date:")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                Spacer()
+                
+                // Affichage de la date formatée
+                Text(formattedDate(from: expense.date))
+                    .font(.subheadline)
+                    .foregroundColor(.black)
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(radius: 5)
+        .padding(.horizontal)
     }
 }
 
