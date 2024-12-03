@@ -3,7 +3,7 @@ import Foundation
 class ExpenseService {
     static let shared = ExpenseService()
     
-    private let baseURL = "http://localhost:3005/api" // Remplacez par l'URL de votre API
+    private let baseURL = "http://localhost:3000/api" // Remplacez par l'URL de votre API
 
     
    

@@ -23,7 +23,7 @@ struct MainView: View {
                     }
 
                 // Onglet Settings
-                settingsView()
+                SettingsView()
                     .tabItem {
                         Label("Settings", systemImage: "gearshape.fill")
                     }
@@ -82,19 +82,20 @@ struct ProfileView: View {
 
 // Vue HomeView
 struct HomeView: View {
-    @StateObject private var viewModel = ExpensesViewModel()
+    @StateObject private var expensesViewModel = ExpensesViewModel()
+    @StateObject private var incomesViewModel = IncomesViewModel() // ViewModel pour les revenus
     @State private var showAddExpenseOrIncome: Bool = false
     
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Loading State
-                if viewModel.isLoading {
+                // Loading State for Expenses
+                if expensesViewModel.isLoading {
                     ProgressView("Loading expenses...")
                         .progressViewStyle(CircularProgressViewStyle())
                         .padding()
-                } else if let errorMessage = viewModel.errorMessage {
-                    // Error Message
+                } else if let errorMessage = expensesViewModel.errorMessage {
+                    // Error Message for Expenses
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .padding()
@@ -106,7 +107,7 @@ struct HomeView: View {
                             .foregroundColor(.purple)
                             .padding(.top)
 
-                        ForEach(viewModel.expenses.prefix(3)) { expense in
+                        ForEach(expensesViewModel.expenses.prefix(3)) { expense in
                             ExpenseCard(expense: expense)
                         }
 
@@ -116,14 +117,48 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
                 }
+                
+                Divider()
+
+                // Loading State for Incomes
+                if incomesViewModel.isLoading {
+                    ProgressView("Loading incomes...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .padding()
+                } else if let errorMessage = incomesViewModel.errorMessage {
+                    // Error Message for Incomes
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                } else {
+                    // Incomes List
+                    VStack(alignment: .leading, spacing: 15) {
+                        Text("Last 3 Incomes")
+                            .font(.headline)
+                            .foregroundColor(.purple)
+                            .padding(.top)
+
+                        ForEach(incomesViewModel.incomes.prefix(3)) { income in
+                            IncomeCard(income: income)
+                        }
+
+                        NavigationLink("View All", destination: Text("All Incomes"))
+                            .foregroundColor(.purple)
+                            .padding(.bottom, 10)
+                    }
+                    .padding(.horizontal)
+                }
             }
         }
         .onAppear {
             if let token = UserDefaults.standard.string(forKey: "access_token") {
-                viewModel.fetchExpenses(token: token)
+                expensesViewModel.fetchExpenses(token: token)
+                incomesViewModel.fetchIncomes(token: token) // Fetch incomes data
             } else {
-                viewModel.errorMessage = "User not logged in."
-                viewModel.isLoading = false
+                expensesViewModel.errorMessage = "User not logged in."
+                expensesViewModel.isLoading = false
+                incomesViewModel.errorMessage = "User not logged in."
+                incomesViewModel.isLoading = false
             }
         }
         .overlay(
@@ -198,6 +233,66 @@ struct ExpenseCard: View {
                 
                 // Affichage de la date formatée
                 Text(formattedDate(from: expense.date))
+                    .font(.subheadline)
+                    .foregroundColor(.black)
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(radius: 5)
+        .padding(.horizontal)
+    }
+}
+
+// Carte de revenu
+struct IncomeCard: View {
+    var income: Income
+    
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // Format année-mois-jour
+        return formatter
+    }
+
+    private func formattedDate(from string: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // Assurez-vous que la date soit dans ce format
+        
+        if let date = formatter.date(from: string) {
+            return dateFormatter.string(from: date)  // Retourne la date formatée
+        }
+        return string  // Si la conversion échoue, retourne la chaîne d'origine
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(income.description)
+                    .font(.headline)
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                
+                Spacer()
+
+                Text("$\(income.amount, specifier: "%.2f")")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.green)
+            }
+            .padding()
+            
+            Divider()
+
+            HStack {
+                Text("Date:")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                Spacer()
+                
+                // Affichage de la date formatée
+                Text(formattedDate(from: income.date))
                     .font(.subheadline)
                     .foregroundColor(.black)
             }
