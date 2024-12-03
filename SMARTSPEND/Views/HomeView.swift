@@ -23,13 +23,12 @@ struct MainView: View {
                     }
 
                 // Onglet Settings
-                SettingsView()
+                settingsView()
                     .tabItem {
                         Label("Settings", systemImage: "gearshape.fill")
                     }
             }
             .accentColor(.purple)
-            
             .navigationBarItems(leading: ProfileButton())
         }
     }
@@ -111,7 +110,7 @@ struct HomeView: View {
                             ExpenseCard(expense: expense)
                         }
 
-                        NavigationLink("View All", destination: Text("All Expenses"))
+                        NavigationLink("View All", destination: AllExpensesView())
                             .foregroundColor(.purple)
                             .padding(.bottom, 10)
                     }
@@ -142,7 +141,7 @@ struct HomeView: View {
                             IncomeCard(income: income)
                         }
 
-                        NavigationLink("View All", destination: Text("All Incomes"))
+                        NavigationLink("View All", destination: AllIncomesView())
                             .foregroundColor(.purple)
                             .padding(.bottom, 10)
                     }
@@ -184,6 +183,12 @@ struct HomeView: View {
         }
     }
 }
+
+// Vue pour afficher toutes les dépenses
+
+
+// Vue pour afficher toutes les sources de revenus
+
 
 // Carte de dépense
 struct ExpenseCard: View {
