@@ -21,12 +21,17 @@ struct MainView: View {
                     .tabItem {
                         Label("Incomes", systemImage: "creditcard.fill")
                     }
+                StatisticsView()
+                    .tabItem {
+                        Label("Statistics", systemImage: "chart.bar.fill")  // Icône de graphique
+                    }
 
                 // Onglet Settings
                 settingsView()
                     .tabItem {
                         Label("Settings", systemImage: "gearshape.fill")
                     }
+                
             }
             .accentColor(.purple)
             .navigationBarItems(leading: ProfileButton())

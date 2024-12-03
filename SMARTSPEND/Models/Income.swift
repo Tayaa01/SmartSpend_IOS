@@ -7,7 +7,7 @@
 import Foundation
 
 // Modèle pour les revenus
-struct Income: Identifiable, Codable {
+struct Income: Identifiable, Codable, Equatable {
     var id: String  // Identifiant unique du revenu
     var amount: Double  // Montant du revenu
     var description: String  // Description du revenu

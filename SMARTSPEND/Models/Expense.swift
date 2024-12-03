@@ -1,6 +1,6 @@
 import Foundation
 
-struct Expense: Identifiable, Codable {
+struct Expense: Identifiable, Codable, Equatable {
     // Utilisez `CodingKeys` pour lier les clés JSON aux propriétés du modèle Swift
     var id: String
     var amount: Double

@@ -195,6 +195,9 @@
 			);
 			mainGroup = CA9E640E2CEE1A8E005F0A4D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CA48A6B02CFF4FBE00D39180 /* XCRemoteSwiftPackageReference "Charts" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CA9E64182CEE1A8E005F0A4D /* Products */;
 			projectDirPath = "";
@@ -552,6 +555,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CA48A6B02CFF4FBE00D39180 /* XCRemoteSwiftPackageReference "Charts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielgindi/Charts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = CA9E640F2CEE1A8E005F0A4D /* Project object */;
 }
