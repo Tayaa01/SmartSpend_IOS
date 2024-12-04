@@ -3,12 +3,20 @@ import SwiftUI
 struct AddExpenseOrIncomeView: View {
     @State private var amount: String = ""
     @State private var description: String = ""
-    @State private var category: String = ""  // Category ID
-    @State private var type: String = "Expense"
-    @State private var categories: [Category] = []  // List of categories
+    @State private var category: String = ""  // Selected Category ID
+    @State private var type: String = "Expense"  // Expense or Income
+    @State private var categories: [Category] = []  // List of all categories
     @State private var errorMessage: String? = nil
     @State private var isSubmitting: Bool = false
     @State private var isLoadingCategories: Bool = true  // Loading state for categories
+    @Environment(\.dismiss) var dismiss  // Environment to dismiss the view
+
+    var onTransactionAdded: (() -> Void)?  // Callback to notify parent view
+
+    // Filtered categories based on the selected type
+    private var filteredCategories: [Category] {
+        categories.filter { $0.type == type }
+    }
 
     // Fetch categories from the server
     func fetchCategories() {
@@ -65,7 +73,15 @@ struct AddExpenseOrIncomeView: View {
             return
         }
 
-        let url = URL(string: "http://localhost:3000/expense?token=\(token)")!
+        // Determine the URL based on the selected type
+        let baseURL = "http://localhost:3000"
+        let endpoint = type == "Expense" ? "expense" : "income"
+        let urlString = "\(baseURL)/\(endpoint)?token=\(token)"
+        guard let url = URL(string: urlString) else {
+            self.errorMessage = "Invalid URL."
+            return
+        }
+
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
@@ -85,33 +101,26 @@ struct AddExpenseOrIncomeView: View {
             return
         }
 
-        print("Request Body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "N/A")")
-
         isSubmitting = true
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 self.isSubmitting = false
 
-                // Handle connection errors
                 if let error = error {
                     self.errorMessage = "Failed to submit: \(error.localizedDescription)"
                     return
                 }
 
-                // Validate HTTP response
-                if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode == 201 {
-                        self.errorMessage = nil
-                        print("Expense successfully submitted.")
-                        // Optionally reset form or navigate away
-                        return
-                    } else {
-                        self.errorMessage = "Server error: \(httpResponse.statusCode)"
-                        return
-                    }
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 {
+                    self.errorMessage = nil
+                    print("Transaction successfully submitted.")
+                    
+                    // Notify parent view and dismiss
+                    onTransactionAdded?()
+                    dismiss()
+                    return
                 }
 
-                // Check the API response body for additional validation
                 if let data = data {
                     print("Response Data: \(String(data: data, encoding: .utf8) ?? "N/A")")
                 }
@@ -147,11 +156,10 @@ struct AddExpenseOrIncomeView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
 
-                // Category Picker
                 if !isLoadingCategories {
                     Picker("Category", selection: $category) {
                         Text("Select Category").tag("")
-                        ForEach(categories, id: \..id) { category in
+                        ForEach(filteredCategories, id: \.id) { category in
                             Text(category.name).tag(category.id)
                         }
                     }
@@ -197,10 +205,12 @@ struct AddExpenseOrIncomeView: View {
 struct Category: Identifiable, Codable {
     var id: String
     var name: String
+    var type: String  // "Expense" or "Income"
 
     private enum CodingKeys: String, CodingKey {
         case id = "_id"
         case name
+        case type
     }
 }
 
