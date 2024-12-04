@@ -184,7 +184,7 @@ struct HomeView: View {
         )
         .navigationTitle("Home")
         .sheet(isPresented: $showAddExpenseOrIncome) {
-            AddExpenseView()
+            AddExpenseOrIncomeView()
         }
     }
 }

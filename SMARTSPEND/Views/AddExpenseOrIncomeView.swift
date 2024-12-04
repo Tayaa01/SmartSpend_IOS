@@ -29,7 +29,7 @@ struct AddExpenseOrIncomeView: View {
                     self.isLoadingCategories = false
                     return
                 }
-                
+
                 guard let data = data else {
                     self.errorMessage = "No data received."
                     self.isLoadingCategories = false
@@ -70,10 +70,11 @@ struct AddExpenseOrIncomeView: View {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
 
+        let currentDate = ISO8601DateFormatter().string(from: Date())
         let body: [String: Any] = [
             "amount": amount,
             "description": description,
-            "date": "2024-11-27T12:00:00Z",  // This could be dynamic
+            "date": currentDate,
             "category": category  // Category ID
         ]
 
@@ -84,22 +85,35 @@ struct AddExpenseOrIncomeView: View {
             return
         }
 
+        print("Request Body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "N/A")")
+
         isSubmitting = true
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 self.isSubmitting = false
+
+                // Handle connection errors
                 if let error = error {
                     self.errorMessage = "Failed to submit: \(error.localizedDescription)"
                     return
                 }
 
-                if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                    if responseString.contains("success") {  // Update this based on your API response
+                // Validate HTTP response
+                if let httpResponse = response as? HTTPURLResponse {
+                    if httpResponse.statusCode == 201 {
                         self.errorMessage = nil
-                        // You can pop the view or show a success message
+                        print("Expense successfully submitted.")
+                        // Optionally reset form or navigate away
+                        return
                     } else {
-                        self.errorMessage = "Failed to submit expense."
+                        self.errorMessage = "Server error: \(httpResponse.statusCode)"
+                        return
                     }
+                }
+
+                // Check the API response body for additional validation
+                if let data = data {
+                    print("Response Data: \(String(data: data, encoding: .utf8) ?? "N/A")")
                 }
             }
         }.resume()
@@ -126,18 +140,18 @@ struct AddExpenseOrIncomeView: View {
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(10)
                     .padding(.horizontal)
-                
+
                 TextField("Description", text: $description)
                     .padding()
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(10)
                     .padding(.horizontal)
-                
+
                 // Category Picker
                 if !isLoadingCategories {
                     Picker("Category", selection: $category) {
                         Text("Select Category").tag("")
-                        ForEach(categories, id: \.id) { category in
+                        ForEach(categories, id: \..id) { category in
                             Text(category.name).tag(category.id)
                         }
                     }
@@ -162,11 +176,12 @@ struct AddExpenseOrIncomeView: View {
                     Text("Submit")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.purple)
+                        .background(isSubmitting ? Color.gray : Color.purple)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
                 .padding(.top)
+                .disabled(isSubmitting)
 
                 Spacer()
             }
@@ -182,6 +197,11 @@ struct AddExpenseOrIncomeView: View {
 struct Category: Identifiable, Codable {
     var id: String
     var name: String
+
+    private enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case name
+    }
 }
 
 struct AddExpenseOrIncomeView_Previews: PreviewProvider {
