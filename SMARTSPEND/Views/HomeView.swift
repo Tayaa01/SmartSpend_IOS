@@ -11,19 +11,14 @@ struct MainView: View {
                     }
 
                 // Onglet Expenses
-                AddExpenseView()
-                    .tabItem {
-                        Label("Expenses", systemImage: "list.bullet")
-                    }
-
-                // Onglet Incomes
-                IncomesView()
-                    .tabItem {
-                        Label("Incomes", systemImage: "creditcard.fill")
-                    }
+                
                 StatisticsView()
                     .tabItem {
                         Label("Statistics", systemImage: "chart.bar.fill")  // Icône de graphique
+                    }
+                RecommendationsView()
+                    .tabItem {
+                        Label("Recomendations", systemImage: "lightbulb.fill")  // Icône de graphique
                     }
 
                 // Onglet Settings
@@ -33,56 +28,13 @@ struct MainView: View {
                     }
                 
             }
-            .accentColor(.purple)
-            .navigationBarItems(leading: ProfileButton())
+            
         }
     }
 }
 
-// Bouton de profil en haut à gauche
-struct ProfileButton: View {
-    @State private var showProfileSheet: Bool = false
-    @State private var userName: String = "John Doe"
-    @State private var userEmail: String = "johndoe@example.com"
-    
-    var body: some View {
-        Button(action: {
-            showProfileSheet.toggle()
-        }) {
-            Image(systemName: "person.circle.fill")
-                .font(.title)
-                .foregroundColor(.purple)
-        }
-        .sheet(isPresented: $showProfileSheet) {
-            ProfileView(userName: userName, userEmail: userEmail)
-        }
-    }
-}
 
-// Vue pour afficher les informations utilisateur
-struct ProfileView: View {
-    var userName: String
-    var userEmail: String
-    
-    var body: some View {
-        VStack {
-            Text("User Profile")
-                .font(.largeTitle)
-                .padding()
 
-            Text("Name: \(userName)")
-                .font(.title2)
-                .padding()
-
-            Text("Email: \(userEmail)")
-                .font(.title2)
-                .padding()
-
-            Spacer()
-        }
-        .padding()
-    }
-}
 
 // Vue HomeView
 struct HomeView: View {
