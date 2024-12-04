@@ -77,8 +77,7 @@ struct SettingsSection: View {
             ForEach(items, id: \.title) { item in
                 item
             }
-        }
-    }
+        }    }
 }
 
 struct SettingsItem: View {
