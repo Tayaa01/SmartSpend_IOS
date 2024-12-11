@@ -5,6 +5,13 @@ struct ForgotPasswordView: View {
     @State private var showAlert: Bool = false // Track alert state
     @State private var alertMessage: String = "" // Custom message for the alert
 
+    // Déclaration des couleurs
+    static let mostImportantColor = Color(red: 47 / 255, green: 126 / 255, blue: 121 / 255)
+    static let importantColor = Color(red: 98 / 255, green: 91 / 255, blue: 113 / 255)
+    static let supportingColor = Color(red: 27 / 255, green: 27 / 255, blue: 31 / 255)
+    static let sand = Color(red: 229 / 255, green: 221 / 255, blue: 200 / 255)
+    static let red = Color(red: 219 / 255, green: 31 / 255, blue: 72 / 255)
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -21,25 +28,25 @@ struct ForgotPasswordView: View {
                 Text("SmartSpend")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundColor(.purple)
+                    .foregroundColor(Self.mostImportantColor)
                     .padding(.bottom, 5)
 
                 // Subtitle
                 Text("Forgot your password?")
                     .font(.title3)
-                    .foregroundColor(.gray)
+                    .foregroundColor(Self.supportingColor)
                     .padding(.bottom, 20)
 
                 // Input Field
                 VStack(spacing: 15) {
                     TextField("Enter your email", text: $email)
                         .padding()
-                        .background(Color.gray.opacity(0.1))
+                        .background(Self.sand)
                         .cornerRadius(10)
-                        .foregroundColor(.black)
+                        .foregroundColor(Self.supportingColor)
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                                .stroke(Self.supportingColor.opacity(0.5), lineWidth: 1)
                         )
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
@@ -54,7 +61,7 @@ struct ForgotPasswordView: View {
                     Text("Send Reset Link")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.purple)
+                        .background(Self.mostImportantColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                         .font(.headline)
@@ -74,14 +81,14 @@ struct ForgotPasswordView: View {
                 // Navigation Link to Sign-In
                 HStack {
                     Text("Remember your password?")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Self.supportingColor)
                     NavigationLink("Sign in", destination: SignInView())
-                        .foregroundColor(.purple)
+                        .foregroundColor(Self.mostImportantColor)
                         .fontWeight(.bold)
                 }
                 .padding(.bottom, 20)
             }
-            .background(Color.white.ignoresSafeArea())
+            .background(Self.sand.ignoresSafeArea())
         }
     }
 

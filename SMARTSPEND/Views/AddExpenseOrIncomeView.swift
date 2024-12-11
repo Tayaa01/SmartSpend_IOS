@@ -130,11 +130,15 @@ struct AddExpenseOrIncomeView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 30) { // Increased spacing for better layout
                 Text("Add \(type)")
                     .font(.title)
                     .fontWeight(.bold)
-                    .padding()
+                    .padding(.top, 120.0) // Increased padding top for more space
+                    .foregroundColor(Color.mostImportantColor) // Use your primary color for title
+
+                // Add some vertical padding here to push the segmented picker down
+                Spacer().frame(height: 20)
 
                 Picker("Type", selection: $type) {
                     Text("Expense").tag("Expense")
@@ -142,40 +146,46 @@ struct AddExpenseOrIncomeView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
+                .background(Color.sandDark) // Darker background for picker
+                .cornerRadius(10)
+                .padding(.horizontal)
 
-                TextField("Amount", text: $amount)
-                    .keyboardType(.decimalPad)
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-
-                TextField("Description", text: $description)
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-
-                if !isLoadingCategories {
-                    Picker("Category", selection: $category) {
-                        Text("Select Category").tag("")
-                        ForEach(filteredCategories, id: \.id) { category in
-                            Text(category.name).tag(category.id)
-                        }
-                    }
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-                } else {
-                    ProgressView("Loading Categories...")
+                VStack(spacing: 25) { // Added vertical spacing between TextFields
+                    TextField("Amount", text: $amount)
+                        .keyboardType(.decimalPad)
                         .padding()
+                        .background(Color.sandDark) // Darker background for text field
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+
+                    TextField("Description", text: $description)
+                        .padding()
+                        .background(Color.sandDark) // Darker background for text field
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+
+                    if !isLoadingCategories {
+                        Picker("Category", selection: $category) {
+                            Text("Select Category").tag("")
+                            ForEach(filteredCategories, id: \.id) { category in
+                                Text(category.name).tag(category.id)
+                            }
+                        }
+                        .padding()
+                        .background(Color.sandDark) // Darker background for picker
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                    } else {
+                        ProgressView("Loading Categories...")
+                            .padding()
+                            .foregroundColor(Color.mostImportantColor)
+                    }
                 }
 
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
-                        .padding(.top)
+                        .padding(.top, 10)
                 }
 
                 Button(action: {
@@ -184,11 +194,11 @@ struct AddExpenseOrIncomeView: View {
                     Text("Submit")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isSubmitting ? Color.gray : Color.purple)
+                        .background(isSubmitting ? Color.gray : Color.mostImportantColor) // Background with main theme color
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
-                .padding(.top)
+                .padding(.top, 20)
                 .disabled(isSubmitting)
 
                 Spacer()
@@ -197,8 +207,11 @@ struct AddExpenseOrIncomeView: View {
                 fetchCategories()
             }
             .navigationTitle("Add \(type)")
+            .background(Color.sand) // Background color of the screen
+            .edgesIgnoringSafeArea(.all)
         }
     }
+
 }
 
 // Category model

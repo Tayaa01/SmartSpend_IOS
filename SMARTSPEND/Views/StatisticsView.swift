@@ -25,27 +25,20 @@ struct StatisticsView: View {
                     .padding()
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 25) {
+                    VStack(alignment: .center, spacing: 25) {
+                        // Centering the StatCards
+                        Spacer()
+                        
                         // Total Expenses
-                        StatCard(title: "Total Expenses", amount: totalExpensesAmount, color: .red, icon: "arrow.down.circle.fill")
+                        StatCard(title: "Total Expenses", amount: totalExpensesAmount, color: Color.red, icon: "arrow.down.circle.fill")
                         
                         // Total Incomes
-                        StatCard(title: "Total Incomes", amount: totalIncomesAmount, color: .green, icon: "arrow.up.circle.fill")
+                        StatCard(title: "Total Incomes", amount: totalIncomesAmount, color: Color.green, icon: "arrow.up.circle.fill")
                         
                         // Net Balance
-                        StatCard(title: "Net Balance", amount: netBalanceAmount, color: netBalanceAmount < 0 ? .red : .green, icon: "circle.fill")
+                        StatCard(title: "Net Balance", amount: netBalanceAmount, color: netBalanceAmount < 0 ? Color.red : Color.green, icon: "circle.fill")
                         
-                        // Average Expenses
-                        StatCard(title: "Average Expenses", amount: averageExpensesAmount, color: .purple, icon: "chart.bar.xaxis")
-                        
-                        // Average Incomes
-                        StatCard(title: "Average Incomes", amount: averageIncomesAmount, color: .purple, icon: "chart.bar")
-                        
-                        // Highest Expense
-                        StatCard(title: "Highest Expense", amount: highestExpenseAmount, color: .orange, icon: "flame.fill")
-                        
-                        // Highest Income
-                        StatCard(title: "Highest Income", amount: highestIncomeAmount, color: .blue, icon: "dollarsign.circle.fill")
+                        Spacer()
                         
                         // Bar Chart for Expenses and Incomes
                         Chart {
@@ -53,23 +46,28 @@ struct StatisticsView: View {
                                 x: .value("Category", "Expenses"),
                                 y: .value("Amount", totalExpensesAmount)
                             )
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.red)
                             
                             BarMark(
                                 x: .value("Category", "Incomes"),
                                 y: .value("Amount", totalIncomesAmount)
                             )
-                            .foregroundStyle(.green)
+                            .foregroundStyle(Color.green)
                         }
                         .frame(height: 300)
                         .padding(.top)
                         
                         Spacer()
                     }
-                    .padding()
+                    .padding(.top)
+                    .background(Color.sandDark) // Darker sand background for the cards
+                    .cornerRadius(20)
+                    .shadow(radius: 10)
                 }
             }
         }
+        .background(Color.sand) // Apply the main background color here
+        .edgesIgnoringSafeArea(.all) // To make sure the background spans the whole screen
         .onAppear {
             if let token = UserDefaults.standard.string(forKey: "access_token") {
                 expensesViewModel.fetchExpenses(token: token)
@@ -120,7 +118,9 @@ struct StatCard: View {
             Spacer()
         }
         .padding()
-        .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
+        .background(Color.sandDark) // Use darker sand color for background
+        .cornerRadius(15)
+        .shadow(radius: 5)
         .padding(.horizontal)
     }
 }
@@ -128,5 +128,6 @@ struct StatCard: View {
 struct StatisticsView_Previews: PreviewProvider {
     static var previews: some View {
         StatisticsView()
+            .preferredColorScheme(.light) // Ensure the view looks good in light mode
     }
 }

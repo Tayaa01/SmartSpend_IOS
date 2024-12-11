@@ -1,104 +1,109 @@
 import SwiftUI
 
+// Vue principale
 struct settingsView: View {
-    @State private var showingLogoutAlert = false // Pour afficher l'alerte
-    @State private var isLoggedOut = false // Pour déclencher la navigation vers la page de connexion
-    @State private var showVersionView = false // Pour contrôler la navigation vers la vue de version
-    @State private var showPrivacyPolicyView = false // Pour contrôler la navigation vers la vue de politique de confidentialité
-    @State private var showTermsOfServiceView = false // Pour contrôler la navigation vers la vue des termes d'utilisation
-    @State private var showContactUsView = false // Pour contrôler la navigation vers la vue Contact Us
-    
+    @State private var showingLogoutAlert = false
+    @State private var isLoggedOut = false
+    @State private var showVersionView = false
+    @State private var showPrivacyPolicyView = false
+    @State private var showTermsOfServiceView = false
+    @State private var showContactUsView = false
+
     var body: some View {
-        VStack {
-            if isLoggedOut {
-                // Afficher la page de connexion après la déconnexion
-                SignInView() // Remplacez ceci par votre vue de connexion réelle
-            } else {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Section Profil
-                        SettingsSection(title: "Profile", items: [
-                            SettingsItem(title: "My Profile", icon: "pencil", action: {}),
-                            SettingsItem(title: "Change Password", icon: "lock", action: {}),
-                            SettingsItem(title: "Log out", icon: "arrow.right.circle", action: {
-                                showingLogoutAlert = true // Affiche l'alerte lorsque l'utilisateur clique sur "Log out"
-                            })
-                        ])
-                        
-                        // Section About
-                        SettingsSection(title: "About", items: [
-                            SettingsItem(title: "Version", icon: "app.fill", action: {
-                                showVersionView = true // Afficher la vue de version
-                            }),
-                            SettingsItem(title: "Privacy Policy", icon: "doc.plaintext", action: {
-                                showPrivacyPolicyView = true // Afficher la vue de politique de confidentialité
-                            }),
-                            SettingsItem(title: "Terms of Service", icon: "doc.text", action: {
-                                showTermsOfServiceView = true // Afficher la vue des conditions d'utilisation
-                            }),
-                            SettingsItem(title: "Contact Us", icon: "phone.fill", action: {
-                                showContactUsView = true // Afficher la vue Contact Us
-                            })
-                        ])
-                        
-                        Spacer()
+        NavigationView {
+            VStack {
+                if isLoggedOut {
+                    SignInView() // Remplacez par votre propre vue de connexion
+                } else {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Section Profil
+                            SettingsSection(title: "Profile", items: [
+                                SettingsItem(title: "My Profile", icon: "person.fill", action: {}),
+                                SettingsItem(title: "Change Password", icon: "key.fill", action: {}),
+                                SettingsItem(title: "Log out", icon: "arrow.right.circle.fill", action: {
+                                    showingLogoutAlert = true
+                                })
+                            ])
+                            
+                            // Section About
+                            SettingsSection(title: "About", items: [
+                                SettingsItem(title: "Version", icon: "info.circle.fill", action: {
+                                    showVersionView = true
+                                }),
+                                SettingsItem(title: "Privacy Policy", icon: "lock.shield.fill", action: {
+                                    showPrivacyPolicyView = true
+                                }),
+                                SettingsItem(title: "Terms of Service", icon: "doc.text.fill", action: {
+                                    showTermsOfServiceView = true
+                                }),
+                                SettingsItem(title: "Contact Us", icon: "envelope.fill", action: {
+                                    showContactUsView = true
+                                })
+                            ])
+                        }
+                        .padding()
+                        .background(
+                            NavigationLink(destination: VersionView(), isActive: $showVersionView) { EmptyView() }
+                        )
+                        .background(
+                            NavigationLink(destination: PrivacyPolicyView(), isActive: $showPrivacyPolicyView) { EmptyView() }
+                        )
+                        .background(
+                            NavigationLink(destination: TermsOfServiceView(), isActive: $showTermsOfServiceView) { EmptyView() }
+                        )
+                        .background(
+                            NavigationLink(destination: ContactUsView(), isActive: $showContactUsView) { EmptyView() }
+                        )
                     }
-                    .padding()
-                    .background(
-                        NavigationLink(destination: VersionView(), isActive: $showVersionView) { EmptyView() }
-                    )
-                    .background(
-                        NavigationLink(destination: PrivacyPolicyView(), isActive: $showPrivacyPolicyView) { EmptyView() }
-                    )
-                    .background(
-                        NavigationLink(destination: TermsOfServiceView(), isActive: $showTermsOfServiceView) { EmptyView() }
-                    )
-                    .background(
-                        NavigationLink(destination: ContactUsView(), isActive: $showContactUsView) { EmptyView() } // Navigation vers Contact Us
-                    )
-                }
-                .navigationTitle("Settings")
-                .alert(isPresented: $showingLogoutAlert) {
-                    Alert(
-                        title: Text("Are you sure you want to log out?"),
-                        message: Text("You will be redirected to the login page."),
-                        primaryButton: .destructive(Text("Log out")) {
-                            logout()
-                        },
-                        secondaryButton: .cancel()
-                    )
+                    .navigationTitle("Settings")
+                    .background(AppBackgroundGradient())
+                    .alert(isPresented: $showingLogoutAlert) {
+                        Alert(
+                            title: Text("Are you sure you want to log out?"),
+                            message: Text("You will be redirected to the login page."),
+                            primaryButton: .destructive(Text("Log out")) {
+                                logout()
+                            },
+                            secondaryButton: .cancel()
+                        )
+                    }
                 }
             }
         }
     }
-    
+
     private func logout() {
-        // Vous pouvez effacer les données de session ou le token ici si nécessaire
-        // Par exemple : UserDefaults.standard.removeObject(forKey: "access_token")
-        
-        // Redirigez l'utilisateur vers la page de connexion
         isLoggedOut = true
     }
 }
 
+// Section des paramètres
 struct SettingsSection: View {
     var title: String
     var items: [SettingsItem]
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 15) {
             Text(title)
                 .font(.headline)
-                .foregroundColor(.purple)
-                .padding(.bottom, 5)
+                .foregroundColor(AppColors.mostImportantColor)
+                .padding(.horizontal)
             
-            ForEach(items, id: \.title) { item in
-                item
+            VStack(spacing: 10) {
+                ForEach(items, id: \.title) { item in
+                    item
+                }
             }
+            .padding()
+            .background(Color.white.opacity(0.9))
+            .cornerRadius(15)
+            .shadow(color: .gray.opacity(0.2), radius: 10, x: 0, y: 5)
         }
     }
 }
 
+// Élément d'une section
 struct SettingsItem: View {
     var title: String
     var icon: String
@@ -109,12 +114,12 @@ struct SettingsItem: View {
             HStack {
                 Image(systemName: icon)
                     .font(.title2)
-                    .foregroundColor(.purple)
+                    .foregroundColor(AppColors.teal)
+                    .padding(.trailing, 10)
                 
                 Text(title)
                     .font(.body)
-                    .foregroundColor(.black)
-                    .padding(.leading, 10)
+                    .foregroundColor(AppColors.supportingColor)
                 
                 Spacer()
                 
@@ -122,25 +127,23 @@ struct SettingsItem: View {
                     .foregroundColor(.gray)
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.white.opacity(0.8))
             .cornerRadius(10)
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
 
-// Vue de la version
+// Vue pour les informations de version
 struct VersionView: View {
     var body: some View {
         VStack(spacing: 20) {
-            // Titre
             Text("App Version")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(.purple)
+                .foregroundColor(AppColors.mostImportantColor)
                 .padding(.top, 20)
             
-            // Informations sur la version et le build
             VStack(alignment: .leading, spacing: 10) {
                 Text("Version : \(getAppVersion())")
                     .font(.title2)
@@ -155,16 +158,14 @@ struct VersionView: View {
             Divider()
                 .padding(.vertical, 20)
             
-            // Informations supplémentaires
             VStack(alignment: .leading, spacing: 10) {
                 Text("About This App")
                     .font(.headline)
-                    .foregroundColor(.purple)
+                    .foregroundColor(AppColors.mostImportantColor)
                 
                 Text("This app is designed to help you manage your finances and make smarter spending decisions. The app provides personalized recommendations based on your financial habits.")
                     .font(.body)
                     .foregroundColor(.black)
-                    .multilineTextAlignment(.leading)
                 
                 Text("Developed by: SmartSpend Team")
                     .font(.body)
@@ -181,10 +182,9 @@ struct VersionView: View {
         .padding()
         .navigationTitle("Version Info")
         .navigationBarTitleDisplayMode(.inline)
-        .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
+        .background(AppBackgroundGradient())
     }
     
-    // Fonction pour récupérer la version de l'application
     func getAppVersion() -> String {
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             return version
@@ -192,7 +192,6 @@ struct VersionView: View {
         return "Unknown"
     }
     
-    // Fonction pour récupérer le build de l'application
     func getAppBuild() -> String {
         if let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
             return build
@@ -201,191 +200,231 @@ struct VersionView: View {
     }
 }
 
-// Vue de la politique de confidentialité
+// Vues pour les autres sections
+// Vue PrivacyPolicyView
 struct PrivacyPolicyView: View {
     var body: some View {
         VStack(spacing: 20) {
-            // Titre
             Text("Privacy Policy")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(.purple)
+                .foregroundColor(AppColors.mostImportantColor)
                 .padding(.top, 20)
             
-            // Politique de confidentialité
-            VStack(alignment: .leading, spacing: 10) {
-                Text("1. Introduction")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("This Privacy Policy explains how we collect, use, and protect your personal information when you use our mobile app. By using our app, you agree to the terms of this policy.")
-                    .font(.body)
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.leading)
-                
-                Text("2. Information We Collect")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("We collect the following types of personal data: Name, email address, location data, usage data.")
-                    .font(.body)
-                    .foregroundColor(.black)
-                
-                Text("3. How We Use Your Information")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("We use the information we collect to provide and improve our services, communicate with you, and personalize your experience.")
-                    .font(.body)
-                    .foregroundColor(.black)
-                
-                Text("4. Data Security")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("We implement appropriate security measures to protect your data. However, no method of transmission over the internet is completely secure.")
-                    .font(.body)
-                    .foregroundColor(.black)
-                
-                Text("5. Contact Us")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("If you have any questions about this Privacy Policy, please contact us at support@smartspend.com.")
-                    .font(.body)
-                    .foregroundColor(.black)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 15) {
+                    Group {
+                        Text("1. Introduction")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("This Privacy Policy explains how we collect, use, and protect your personal information when you use our mobile app. By using our app, you agree to the terms of this policy.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                        
+                        Text("2. Information We Collect")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("We collect the following types of personal data: Name, email address, location data, usage data.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                    }
+                    
+                    Group {
+                        Text("3. How We Use Your Information")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("We use the information we collect to provide and improve our services, communicate with you, and personalize your experience.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                        
+                        Text("4. Data Security")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("We implement appropriate security measures to protect your data. However, no method of transmission over the internet is completely secure.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                        
+                        Text("5. Contact Us")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("If you have any questions about this Privacy Policy, please contact us at support@smartspend.com.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                    }
+                }
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, 20)
             
             Spacer()
         }
         .padding()
         .navigationTitle("Privacy Policy")
         .navigationBarTitleDisplayMode(.inline)
-        .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
+        .background(AppBackgroundGradient())
     }
 }
 
-// Vue des termes d'utilisation
+// Vue TermsOfServiceView
 struct TermsOfServiceView: View {
     var body: some View {
         VStack(spacing: 20) {
-            // Titre
             Text("Terms of Service")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(.purple)
+                .foregroundColor(AppColors.mostImportantColor)
                 .padding(.top, 20)
             
-            // Conditions d'utilisation
-            VStack(alignment: .leading, spacing: 10) {
-                Text("1. Introduction")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("These Terms of Service govern your use of our mobile application. By using our app, you agree to these terms.")
-                    .font(.body)
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.leading)
-                
-                Text("2. Use of the App")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("You may use our app only for lawful purposes and in accordance with these Terms of Service.")
-                    .font(.body)
-                    .foregroundColor(.black)
-                
-                Text("3. Limitation of Liability")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("We are not liable for any direct or indirect damages arising from the use of the app.")
-                    .font(.body)
-                    .foregroundColor(.black)
-                
-                Text("4. Termination")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("We may suspend or terminate your access to the app if you violate these terms.")
-                    .font(.body)
-                    .foregroundColor(.black)
-                
-                Text("5. Contact Us")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("For any questions or concerns, please contact us at support@smartspend.com.")
-                    .font(.body)
-                    .foregroundColor(.black)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 15) {
+                    Group {
+                        Text("1. Introduction")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("These Terms of Service govern your use of our mobile application. By using our app, you agree to these terms.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                        
+                        Text("2. Use of the App")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("You may use our app only for lawful purposes and in accordance with these Terms of Service.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                    }
+                    
+                    Group {
+                        Text("3. Account Responsibility")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("You are responsible for maintaining the confidentiality of your account and for all activities that occur under your account.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                        
+                        Text("4. Termination of Access")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("We may terminate or suspend your access to the app at our sole discretion, without notice, for conduct that violates these terms.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                        
+                        Text("5. Limitation of Liability")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("Our liability for any claims related to the use of the app is limited to the maximum extent permitted by law.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                        
+                        Text("6. Contact Us")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("If you have any questions about these Terms of Service, please contact us at support@smartspend.com.")
+                            .font(.body)
+                            .foregroundColor(.black)
+                    }
+                }
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, 20)
             
             Spacer()
         }
         .padding()
         .navigationTitle("Terms of Service")
         .navigationBarTitleDisplayMode(.inline)
-        .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
+        .background(AppBackgroundGradient())
     }
 }
 
-// Vue Contact Us
+// Vue ContactUsView
 struct ContactUsView: View {
     var body: some View {
         VStack(spacing: 20) {
-            // Titre
             Text("Contact Us")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(.purple)
+                .foregroundColor(AppColors.mostImportantColor)
                 .padding(.top, 20)
             
-            // Informations de contact
-            VStack(alignment: .leading, spacing: 10) {
-                Text("If you have any questions or need assistance, feel free to contact us through the following methods:")
-                    .font(.body)
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.leading)
-                
+            VStack(alignment: .leading, spacing: 15) {
                 Text("Email: support@smartspend.com")
-                    .font(.title2)
+                    .font(.body)
                     .foregroundColor(.blue)
                 
-                Text("Phone: +1 (555) 123-4567")
-                    .font(.title2)
+                Text("Phone: +1 123 456 7890")
+                    .font(.body)
                     .foregroundColor(.blue)
                 
-                Text("Follow us on social media for updates:")
+                Text("Follow us on social media:")
                     .font(.body)
                     .foregroundColor(.black)
                 
-                HStack {
-                    Image("logo.facebook") // Remplacez "facebook_logo" par le nom de l'image dans vos assets
+                HStack(spacing: 20) {
+                    Image("facebook") // Utilisez le nom exact de l'image dans les Assets
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 30, height: 30)
+                        .frame(width: 40, height: 40)
                     
-                    Image("logo.twitter") // Remplacez "twitter_logo" par le nom de l'image dans vos assets
+                    Image("twitter") // Utilisez le nom exact de l'image dans les Assets
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 30, height: 30)
+                        .frame(width: 40, height: 40)
                     
-                    Image("logo.instagram") // Remplacez "instagram_logo" par le nom de l'image dans vos assets
+                    Image("instagram") // Utilisez le nom exact de l'image dans les Assets
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 30, height: 30)
+                        .frame(width: 40, height: 40)
                 }
-
+                .padding(.top, 10)
             }
             .padding(.horizontal, 20)
             
             Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity) // Prend tout l'espace disponible
         .padding()
         .navigationTitle("Contact Us")
         .navigationBarTitleDisplayMode(.inline)
-        .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
+        .background(AppBackgroundGradient().edgesIgnoringSafeArea(.all)) // Fond couvrant toute la page
+    }
+}
+
+
+// Utilitaire pour le fond
+struct AppBackgroundGradient: View {
+    var body: some View {
+        LinearGradient(gradient: Gradient(colors: [AppColors.sand, AppColors.sand.opacity(0.7)]),
+                       startPoint: .topLeading,
+                       endPoint: .bottomTrailing)
+            .ignoresSafeArea()
+    }
+}
+
+// Définitions des couleurs
+
+// Extension pour les couleurs hexadécimales
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let scanner = Scanner(string: hex)
+        scanner.currentIndex = hex.startIndex
+        
+        var rgbValue: UInt64 = 0
+        scanner.scanHexInt64(&rgbValue)
+        
+        let r = Double((rgbValue & 0xFF0000) >> 16) / 255.0
+        let g = Double((rgbValue & 0x00FF00) >> 8) / 255.0
+        let b = Double(rgbValue & 0x0000FF) / 255.0
+        
+        self.init(red: r, green: g, blue: b)
     }
 }

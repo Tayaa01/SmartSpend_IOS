@@ -1,6 +1,27 @@
 import SwiftUI
 
 struct SignInView: View {
+    // Déclarations des couleurs
+    static let mostImportantColor = Color(red: 47 / 255, green: 126 / 255, blue: 121 / 255) // Most important
+    static let importantColor = Color(red: 98 / 255, green: 91 / 255, blue: 113 / 255)
+    static let supportingColor = Color(red: 27 / 255, green: 27 / 255, blue: 31 / 255)
+    static let leastImportantColor = Color(red: 21 / 255, green: 82 / 255, blue: 99 / 255)
+    static let zinc = Color(red: 47 / 255, green: 126 / 255, blue: 121 / 255)
+    static let red = Color(red: 219 / 255, green: 31 / 255, blue: 72 / 255)
+    static let sand = Color(red: 229 / 255, green: 221 / 255, blue: 200 / 255)
+    static let teal = Color(red: 1 / 255, green: 148 / 255, blue: 154 / 255)
+    static let navy = Color(red: 32 / 255, green: 90 / 255, blue: 106 / 255)
+
+    // Couleurs additionnelles
+    static let lightBlue = Color(red: 173 / 255, green: 216 / 255, blue: 230 / 255)
+    static let lightGreen = Color(red: 144 / 255, green: 238 / 255, blue: 144 / 255)
+    static let lightCoral = Color(red: 240 / 255, green: 128 / 255, blue: 128 / 255)
+    static let lightGoldenrodYellow = Color(red: 250 / 255, green: 250 / 255, blue: 210 / 255)
+    static let lightSlateGray = Color(red: 119 / 255, green: 136 / 255, blue: 153 / 255)
+    static let lightSteelBlue = Color(red: 176 / 255, green: 196 / 255, blue: 222 / 255)
+    static let lightSalmon = Color(red: 255 / 255, green: 160 / 255, blue: 122 / 255)
+    static let lightSeaGreen = Color(red: 32 / 255, green: 178 / 255, blue: 170 / 255)
+
     @State var username: String = ""
     @State var password: String = ""
     @State private var errorMessage: String?
@@ -16,57 +37,61 @@ struct SignInView: View {
                 Image("tnd")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 100, height: 100)
-                    .padding(.bottom, 10)
+                    .frame(width: 120, height: 120)
+                    .padding(.bottom, 15)
 
                 // Title
                 Text("SmartSpend")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundColor(Color.purple)
+                    .foregroundColor(Self.mostImportantColor)
                     .padding(.bottom, 5)
 
                 // Subtitle
                 Text("Sign In to continue")
                     .font(.title3)
-                    .foregroundColor(Color.gray)
-                    .padding(.bottom, 20)
+                    .foregroundColor(Self.supportingColor)
+                    .padding(.bottom, 25)
 
                 // Input Fields
-                VStack(spacing: 15) {
+                VStack(spacing: 20) {
+                    // Username
                     TextField("Email", text: $username)
                         .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .foregroundColor(.black)
+                        .background(Self.sand)
+                        .cornerRadius(15)
+                        .foregroundColor(Self.supportingColor)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 15)
+                                .stroke(Self.mostImportantColor, lineWidth: 1)
                         )
 
-                    SecureField("Password", text:  $password)
+                    // Password
+                    SecureField("Password", text: $password)
                         .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .foregroundColor(.black)
+                        .background(Self.sand)
+                        .cornerRadius(15)
+                        .foregroundColor(Self.supportingColor)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 15)
+                                .stroke(Self.mostImportantColor, lineWidth: 1)
                         )
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 30)
 
                 // Error Message
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
-                        .foregroundColor(.red)
+                        .foregroundColor(Self.red)
+                        .fontWeight(.semibold)
                         .padding()
                 }
 
                 // Success Message
                 if let successMessage = successMessage {
                     Text(successMessage)
-                        .foregroundColor(.green)
+                        .foregroundColor(Self.mostImportantColor)
+                        .fontWeight(.semibold)
                         .padding()
                 }
 
@@ -77,10 +102,10 @@ struct SignInView: View {
                         Text("Forgot Password?")
                             .font(.caption)
                             .fontWeight(.semibold)
-                            .foregroundColor(.purple)
+                            .foregroundColor(Self.importantColor)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 30)
                 .padding(.top, 10)
 
                 // Sign-In Button
@@ -90,12 +115,12 @@ struct SignInView: View {
                     Text("Sign in")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.purple)
+                        .background(Self.mostImportantColor)
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .cornerRadius(15)
                         .font(.headline)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 30)
                 .padding(.top, 20)
 
                 Spacer()
@@ -103,18 +128,19 @@ struct SignInView: View {
                 // Sign-Up Link
                 HStack {
                     Text("Don't have an account?")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Self.supportingColor)
                     NavigationLink("Sign up", destination: SignUpView())
-                        .foregroundColor(.purple)
+                        .foregroundColor(Self.mostImportantColor)
                         .fontWeight(.bold)
                 }
-                .padding(.bottom, 20)
+                .padding(.bottom, 25)
             }
-            .background(Color.white.ignoresSafeArea())
+            .background(Self.sand.ignoresSafeArea())
             .background(
                 NavigationLink(
-                    destination: MainView(),
+                    destination: MainView().navigationBarBackButtonHidden(true),
                     isActive: $navigateToHome,
+                   
                     label: { EmptyView() }
                 )
             )
@@ -171,7 +197,6 @@ struct SignInView: View {
                             let ttt = UserDefaults.standard.string(forKey: "access_token")
                             print("Successfully logged in! Token: \(ttt)")
 
-
                             // Success, navigate to Home screen
                             successMessage = "Successfully logged in!"
                             errorMessage = nil // Clear error message
@@ -190,7 +215,6 @@ struct SignInView: View {
             }
         }.resume()
     }
-
 }
 
 struct SignInView_Previews: PreviewProvider {

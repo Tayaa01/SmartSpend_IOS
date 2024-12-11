@@ -10,6 +10,9 @@ class IncomesViewModel: ObservableObject {
     @Published var incomes: [Income] = []  // Liste des revenus
     @Published var isLoading: Bool = true  // Indicateur de chargement
     @Published var errorMessage: String?  // Message d'erreur si la récupération échoue
+    var totalIncome: Double {
+           incomes.reduce(0) { $0 + $1.amount }
+       }
 
     private let incomeService = IncomeService()  // Instance du service IncomeService
     

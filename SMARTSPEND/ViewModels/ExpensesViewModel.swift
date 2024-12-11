@@ -11,7 +11,9 @@ class ExpensesViewModel: ObservableObject {
     @Published var expenses: [Expense] = []  // To store fetched expenses
     @Published var isLoading: Bool = false   // Loading state
     @Published var errorMessage: String?     // Error message in case of failure
-    
+    var totalExpenses: Double {
+           expenses.reduce(0) { $0 + $1.amount }
+       }
     // Function to fetch expenses from backend
     func fetchExpenses(token: String) {
         guard let url = URL(string: "http://localhost:3000/expense?token=\(token)") else {
