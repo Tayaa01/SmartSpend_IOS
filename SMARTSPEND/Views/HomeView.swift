@@ -45,6 +45,8 @@ struct MainView: View {
     }
 }
 
+// MARK: - Home View
+// MARK: - Home View
 struct HomeView: View {
     @StateObject private var expensesViewModel = ExpensesViewModel()
     @StateObject private var incomesViewModel = IncomesViewModel()
@@ -54,18 +56,21 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 30) {
                 ZStack {
-                    Color.sand
-                        .frame(maxWidth: .infinity)
-                        .cornerRadius(12)
-                        .shadow(color: Color.sand.opacity(0.3), radius: 8, x: 0, y: 4)
-                        .padding(-20)
-                    VStack
-                    {
+                    // Image d'arrière-plan
+                    Image("homebackground")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 300) // Ajuster la hauteur de l'image
+                        .clipped() // S'assure que l'image ne dépasse pas les bords
+                    
+                    VStack {
                         Spacer(minLength: 50)
-                        
-                        BalanceCardView(totalIncome: incomesViewModel.totalIncome, totalExpenses: expensesViewModel.totalExpenses)
-                            .padding(16.0)
-                        
+
+                        BalanceCardView(
+                            totalIncome: incomesViewModel.totalIncome,
+                            totalExpenses: expensesViewModel.totalExpenses
+                        )
+                        .padding(16.0)
                     }
                 }
 
@@ -92,29 +97,51 @@ struct HomeView: View {
 
                 Divider().padding(.horizontal)
 
-                CardSectionView(
-                    title: "Last 3 Expenses",
-                    items: expensesViewModel.expenses.prefix(3),
-                    isLoading: expensesViewModel.isLoading,
-                    errorMessage: expensesViewModel.errorMessage,
-                    cardContent: { expense in
-                        ExpenseCard(expense: expense) // Using the ExpenseCard with updated background color
-                    },
-                    navigationDestination: AllExpensesView()
-                )
+                // Last 3 Expenses Section with View All button in the same row
+                HStack {
+                    CardSectionView(
+                        title: "Last 3 Expenses",
+                        items: expensesViewModel.expenses.prefix(3),
+                        isLoading: expensesViewModel.isLoading,
+                        errorMessage: expensesViewModel.errorMessage,
+                        cardContent: { expense in
+                            ExpenseCard(expense: expense)
+                        },
+                        navigationDestination: AllExpensesView()
+                    )
+                    Spacer()
+                    NavigationLink(destination: AllExpensesView()) {
+                        Text("View All")
+                            .foregroundColor(.mostImportantColor)
+                            .padding(.leading)
+                            .font(.subheadline)
+                    }
+                    .padding(.bottom)
+                }
 
                 Divider().padding(.horizontal)
 
-                CardSectionView(
-                    title: "Last 3 Incomes",
-                    items: incomesViewModel.incomes.prefix(3),
-                    isLoading: incomesViewModel.isLoading,
-                    errorMessage: incomesViewModel.errorMessage,
-                    cardContent: { income in
-                        IncomeCard(income: income) // Using the IncomeCard with updated background color
-                    },
-                    navigationDestination: AllIncomesView()
-                )
+                // Last 3 Incomes Section with View All button in the same row
+                HStack {
+                    CardSectionView(
+                        title: "Last 3 Incomes",
+                        items: incomesViewModel.incomes.prefix(3),
+                        isLoading: incomesViewModel.isLoading,
+                        errorMessage: incomesViewModel.errorMessage,
+                        cardContent: { income in
+                            IncomeCard(income: income)
+                        },
+                        navigationDestination: AllIncomesView()
+                    )
+                    Spacer()
+                    NavigationLink(destination: AllIncomesView()) {
+                        Text("View All")
+                            .foregroundColor(.mostImportantColor)
+                            .padding(.leading)
+                            .font(.subheadline)
+                    }
+                    .padding(.bottom)
+                }
             }
             .padding(.horizontal)
         }
@@ -145,47 +172,59 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Balance Card View
+// BalanceCardView
 struct BalanceCardView: View {
     var totalIncome: Double
     var totalExpenses: Double
 
     var body: some View {
         ZStack {
-            Color.sandDark // Apply darker color to all cards, including the balance card
+            Color.navy
                 .cornerRadius(12)
-                .shadow(color: Color.sandDark.opacity(0.3), radius: 6, x: 0, y: 2)
+                .shadow(color: Color.navy.opacity(0.3), radius: 6, x: 0, y: 2)
 
-            VStack(spacing: 15) {
-                Text("Account Balance")
+            VStack(spacing: 8) {
+                Text("Balance")
                     .font(.headline)
-                    .foregroundColor(.mostImportantColor)
+                    .foregroundColor(.white)
+
+                let balance = totalIncome - totalExpenses
+                Text("$\(balance, specifier: "%.2f")")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(balance >= 0 ? .lightGreen : .red)
 
                 HStack {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Total Income: $\(totalIncome, specifier: "%.2f")")
+                    VStack {
+                        Text("Expenses")
                             .font(.subheadline)
-                            .foregroundColor(.mostImportantColor)
-
-                        Text("Total Expenses: $\(totalExpenses, specifier: "%.2f")")
-                            .font(.subheadline)
+                            .foregroundColor(.white)
+                        Text("-$\(totalExpenses, specifier: "%.2f")")
+                            .font(.headline)
                             .foregroundColor(.red)
                     }
+                    .frame(maxWidth: .infinity, alignment: .center)
 
-                    Spacer()
+                    Divider()
+                        .frame(height: 40)
+                        .background(Color.white)
 
-                    let balance = totalIncome - totalExpenses
-                    Text("Balance: $\(balance, specifier: "%.2f")")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(balance >= 0 ? .mostImportantColor : .red)
+                    VStack {
+                        Text("Income")
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                        Text("+$\(totalIncome, specifier: "%.2f")")
+                            .font(.headline)
+                            .foregroundColor(.lightGreen)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
+                .padding(.top, 8)
             }
             .padding()
-            .background(Color.sandDark) // Apply darker background here as well
-            .cornerRadius(12)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: 300, maxHeight: 180) // Increased card width and height
+        .offset(y: 50) // Lower the card by adding vertical offset
     }
 }
 
@@ -210,39 +249,153 @@ struct ProgressBar: View {
 // MARK: - Expense and Income Cards
 struct ExpenseCard: View {
     var expense: Expense
+    
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // Format de la date
+        return formatter
+    }
 
+    private func formattedDate(from string: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // Assurez-vous que la date soit dans ce format
+        
+        if let date = formatter.date(from: string) {
+            return dateFormatter.string(from: date)  // Retourne la date formatée
+        }
+        return string  // Si la conversion échoue, retourne la chaîne d'origine
+    }
+    
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(expense.description)
-                .font(.headline)
-            Text("$\(expense.amount, specifier: "%.2f")")
-                .foregroundColor(.red)
+        HStack {
+            // Affichage d'une icône de catégorie
+            Image(systemName: "tag.fill")
+                .font(.title)
+                .foregroundColor(.mostImportantColor)
+                .frame(width: 40, height: 40)
+                .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
+                .padding(.trailing, 10)
+            
+            // Informations sur la dépense
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text(expense.description)
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    
+                    Spacer()
+                    
+                    Text("$\(expense.amount, specifier: "%.2f")")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.red)
+                }
+                
+                HStack {
+                    Text("Date:")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    Spacer()
+                    Text(formattedDate(from: expense.date))
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                }
+            }
+            .padding(.vertical, 10)
+            
+            Spacer()
         }
         .padding()
-        .background(Color.sandDark) // Use the darker color for the cards
-        .cornerRadius(12)
-        .shadow(color: Color.sandDark.opacity(0.3), radius: 6, x: 0, y: 2)
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(radius: 5)
+        .padding(.horizontal)
+        .frame(maxWidth: .infinity) // Utilisation de la largeur maximale de la carte
+        .overlay( // Ajout d'une ligne en bas de la carte
+            Divider()
+                .background(Color.gray)
+                .padding(.top, 10),
+            alignment: .bottom
+        )
     }
 }
-
 struct IncomeCard: View {
     var income: Income
+    
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // Format de la date
+        return formatter
+    }
 
+    private func formattedDate(from string: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // Assurez-vous que la date soit dans ce format
+        
+        if let date = formatter.date(from: string) {
+            return dateFormatter.string(from: date)  // Retourne la date formatée
+        }
+        return string  // Si la conversion échoue, retourne la chaîne d'origine
+    }
+    
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(income.description)
-                .font(.headline)
-            Text("$\(income.amount, specifier: "%.2f")")
-                .foregroundColor(.mostImportantColor)
+        HStack {
+            // Icône de catégorie
+            Image(systemName: "dollarsign.circle.fill")
+                .font(.title)
+                .foregroundColor(.mostImportantColor) // Utilisation de la couleur importante
+                .frame(width: 40, height: 40)
+                .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
+                .padding(.trailing, 10)
+            
+            // Détails du revenu
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text(income.description)
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    
+                    Spacer()
+                    
+                    Text("$\(income.amount, specifier: "%.2f")")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.green)
+                }
+                
+                HStack {
+                    Text("Date:")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    Spacer()
+                    Text(formattedDate(from: income.date))
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                }
+            }
+            .padding(.vertical, 10)
+            
+            Spacer()
         }
         .padding()
-        .background(Color.sandDark) // Use the darker color for the cards
-        .cornerRadius(12)
-        .shadow(color: Color.sandDark.opacity(0.3), radius: 6, x: 0, y: 2)
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(radius: 5)
+        .padding(.horizontal)
+        .frame(maxWidth: .infinity) // Utilisation de la largeur maximale
+        .overlay( // Ajout d'une ligne en bas de la carte
+            Divider()
+                .background(Color.gray)
+                .padding(.top, 10),
+            alignment: .bottom
+        )
     }
 }
 
-// Floating Add Button
 // Floating Add Button
 struct FloatingAddButton: View {
     var action: () -> Void
@@ -260,7 +413,6 @@ struct FloatingAddButton: View {
         .padding(.bottom, 100) // Adjust bottom padding to move vertically
     }
 }
-
 
 // MARK: - Card Section View (Generic for both Expenses and Incomes)
 struct CardSectionView<Item: Identifiable, Content: View, Destination: View>: View {
@@ -305,8 +457,6 @@ struct CardSectionView<Item: Identifiable, Content: View, Destination: View>: Vi
         .padding(.vertical)
     }
 }
-
-
 
 // MARK: - Previews
 struct MainView_Previews: PreviewProvider {
