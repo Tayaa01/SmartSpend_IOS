@@ -76,25 +76,7 @@ struct HomeView: View {
 
                 Divider().padding(.horizontal)
 
-                VStack(alignment: .leading, spacing: 15) {
-                    Text("Spending Overview")
-                        .font(.headline)
-                        .foregroundColor(.mostImportantColor)
-
-                    let progress = (incomesViewModel.totalIncome > 0) ? expensesViewModel.totalExpenses / incomesViewModel.totalIncome : 0
-
-                    ProgressBar(value: progress)
-                        .frame(height: 20)
-                        .padding()
-                        .background(Color.sandDark) // Use darker sand color for the progress bar
-                        .cornerRadius(12)
-                        .shadow(color: Color.sandDark.opacity(0.3), radius: 6, x: 0, y: 2)
-
-                    Text("Spent: $\(expensesViewModel.totalExpenses, specifier: "%.2f") / $\(incomesViewModel.totalIncome, specifier: "%.2f")")
-                        .foregroundColor(.gray)
-                        .font(.subheadline)
-                }
-
+                
                 Divider().padding(.horizontal)
 
                 // Last 3 Expenses Section with View All button in the same row
@@ -229,22 +211,6 @@ struct BalanceCardView: View {
 }
 
 // MARK: - Progress Bar (Custom)
-struct ProgressBar: View {
-    var value: Double
-
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Color.gray.opacity(0.3)
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .cornerRadius(geometry.size.height / 2)
-                Color.mostImportantColor
-                    .frame(width: geometry.size.width * CGFloat(value), height: geometry.size.height)
-                    .cornerRadius(geometry.size.height / 2)
-            }
-        }
-    }
-}
 
 // MARK: - Expense and Income Cards
 struct ExpenseCard: View {
@@ -365,6 +331,7 @@ struct IncomeCard: View {
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.green)
+                        
                 }
                 
                 HStack {

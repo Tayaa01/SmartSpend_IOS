@@ -1,10 +1,3 @@
-//
-//  RecommendationsView.swift
-//  SMARTSPEND
-//
-//  Created by yassmine zammali on 4/12/2024.
-//
-
 import SwiftUI
 
 struct RecommendationsView: View {
@@ -110,15 +103,8 @@ struct RecommendationsView: View {
             }
             .navigationTitle("Recommendations")
             .navigationBarTitleDisplayMode(.inline)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .edgesIgnoringSafeArea(.all)
-            )
-            .padding(.top)
+            .background(Color.sand) // Set the background to sand color
+            .edgesIgnoringSafeArea(.all) // Make sure it covers the whole screen
         }
     }
 }
