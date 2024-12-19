@@ -53,104 +53,106 @@ struct HomeView: View {
     @State private var showAddExpenseOrIncome: Bool = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 30) {
-                ZStack {
-                    // Image d'arrière-plan
-                    Image("homebackground")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(height: 300) // Ajuster la hauteur de l'image
-                        .clipped() // S'assure que l'image ne dépasse pas les bords
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 30) {
+                    ZStack {
+                        // Image d'arrière-plan
+                        Image("homebackground")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 300) // Ajuster la hauteur de l'image
+                            .clipped() // S'assure que l'image ne dépasse pas les bords
+                        
+                        VStack {
+                            Spacer(minLength: 50)
+
+                            BalanceCardView(
+                                totalIncome: incomesViewModel.totalIncome,
+                                totalExpenses: expensesViewModel.totalExpenses
+                            )
+                            .padding(16.0)
+                        }
+                    }
+
+                    Divider().padding(.horizontal)
+
                     
-                    VStack {
-                        Spacer(minLength: 50)
+                    Divider().padding(.horizontal)
 
-                        BalanceCardView(
-                            totalIncome: incomesViewModel.totalIncome,
-                            totalExpenses: expensesViewModel.totalExpenses
+                    // Last 3 Expenses Section with View All button in the same row
+                    HStack {
+                        CardSectionView(
+                            title: "Last 3 Expenses",
+                            items: expensesViewModel.expenses.prefix(3),
+                            isLoading: expensesViewModel.isLoading,
+                            errorMessage: expensesViewModel.errorMessage,
+                            cardContent: { expense in
+                                ExpenseCard(expense: expense)
+                            },
+                            navigationDestination: AllExpensesView()
                         )
-                        .padding(16.0)
+                        Spacer()
+                        NavigationLink(destination: AllExpensesView()) {
+                            Text("View All")
+                                .foregroundColor(.mostImportantColor)
+                                .padding(.leading)
+                                .font(.subheadline)
+                        }
+                        .padding(.bottom)
+                    }
+
+                    Divider().padding(.horizontal)
+
+                    // Last 3 Incomes Section with View All button in the same row
+                    HStack {
+                        CardSectionView(
+                            title: "Last 3 Incomes",
+                            items: incomesViewModel.incomes.prefix(3),
+                            isLoading: incomesViewModel.isLoading,
+                            errorMessage: incomesViewModel.errorMessage,
+                            cardContent: { income in
+                                IncomeCard(income: income)
+                            },
+                            navigationDestination: AllIncomesView()
+                        )
+                        Spacer()
+                        NavigationLink(destination: AllIncomesView()) {
+                            Text("View All")
+                                .foregroundColor(.mostImportantColor)
+                                .padding(.leading)
+                                .font(.subheadline)
+                        }
+                        .padding(.bottom)
                     }
                 }
-
-                Divider().padding(.horizontal)
-
-                
-                Divider().padding(.horizontal)
-
-                // Last 3 Expenses Section with View All button in the same row
-                HStack {
-                    CardSectionView(
-                        title: "Last 3 Expenses",
-                        items: expensesViewModel.expenses.prefix(3),
-                        isLoading: expensesViewModel.isLoading,
-                        errorMessage: expensesViewModel.errorMessage,
-                        cardContent: { expense in
-                            ExpenseCard(expense: expense)
-                        },
-                        navigationDestination: AllExpensesView()
-                    )
-                    Spacer()
-                    NavigationLink(destination: AllExpensesView()) {
-                        Text("View All")
-                            .foregroundColor(.mostImportantColor)
-                            .padding(.leading)
-                            .font(.subheadline)
-                    }
-                    .padding(.bottom)
-                }
-
-                Divider().padding(.horizontal)
-
-                // Last 3 Incomes Section with View All button in the same row
-                HStack {
-                    CardSectionView(
-                        title: "Last 3 Incomes",
-                        items: incomesViewModel.incomes.prefix(3),
-                        isLoading: incomesViewModel.isLoading,
-                        errorMessage: incomesViewModel.errorMessage,
-                        cardContent: { income in
-                            IncomeCard(income: income)
-                        },
-                        navigationDestination: AllIncomesView()
-                    )
-                    Spacer()
-                    NavigationLink(destination: AllIncomesView()) {
-                        Text("View All")
-                            .foregroundColor(.mostImportantColor)
-                            .padding(.leading)
-                            .font(.subheadline)
-                    }
-                    .padding(.bottom)
+                .padding(.horizontal)
+            }
+            .onAppear {
+                if let token = UserDefaults.standard.string(forKey: "access_token") {
+                    expensesViewModel.fetchExpenses(token: token)
+                    incomesViewModel.fetchIncomes(token: token)
+                } else {
+                    expensesViewModel.errorMessage = "User not logged in."
+                    incomesViewModel.errorMessage = "User not logged in."
                 }
             }
-            .padding(.horizontal)
-        }
-        .onAppear {
-            if let token = UserDefaults.standard.string(forKey: "access_token") {
-                expensesViewModel.fetchExpenses(token: token)
-                incomesViewModel.fetchIncomes(token: token)
-            } else {
-                expensesViewModel.errorMessage = "User not logged in."
-                incomesViewModel.errorMessage = "User not logged in."
+            .overlay(
+                FloatingAddButton(action: {
+                    showAddExpenseOrIncome.toggle()
+                })
+                .padding(.trailing, 20)
+                .padding(.bottom, 30),
+                alignment: .bottomTrailing
+            )
+            .sheet(isPresented: $showAddExpenseOrIncome) {
+                AddExpenseOrIncomeView()
             }
+            .navigationTitle("Home")
+            .foregroundColor(.mostImportantColor)
+            .background(Color.sand) // Background color of the screen
+            .edgesIgnoringSafeArea(.all) // Optional, if you want to extend the background to the edges
         }
-        .overlay(
-            FloatingAddButton(action: {
-                showAddExpenseOrIncome.toggle()
-            })
-            .padding(.trailing, 20)
-            .padding(.bottom, 30),
-            alignment: .bottomTrailing
-        )
-        .sheet(isPresented: $showAddExpenseOrIncome) {
-            AddExpenseOrIncomeView()
-        }
-        .navigationTitle("Home")
-        .foregroundColor(.mostImportantColor)
-        .background(Color.sand) // Background color of the screen
-        .edgesIgnoringSafeArea(.all) // Optional, if you want to extend the background to the edges
     }
 }
 
