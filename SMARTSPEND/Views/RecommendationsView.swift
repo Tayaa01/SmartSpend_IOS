@@ -81,15 +81,19 @@ struct RecommendationsView: View {
                         .shadow(radius: 4)
                         
                         ScrollView {
-                            Text(recommendationText)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white)
-                                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                                )
-                                .multilineTextAlignment(.leading)
-                                .font(.body)
+                            VStack(alignment: .leading, spacing: 15) {
+                                Text(recommendationText)
+                                    .padding()
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.white)
+                                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                                    )
+                                    .multilineTextAlignment(.leading)
+                                    .font(.body)
+                                    .padding(.top, 20) // Move the text a bit lower
+                            }
+                            .padding(.horizontal, 20)
                         }
                         .padding(.top, 10)
                     }
@@ -104,7 +108,7 @@ struct RecommendationsView: View {
             .navigationTitle("Recommendations")
             .navigationBarTitleDisplayMode(.inline)
             .background(Color.sand) // Set the background to sand color
-            .edgesIgnoringSafeArea(.all) // Make sure it covers the whole screen
+            .edgesIgnoringSafeArea(.bottom) // Make sure it covers the whole screen except the top
         }
     }
 }
