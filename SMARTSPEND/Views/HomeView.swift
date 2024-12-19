@@ -46,7 +46,6 @@ struct MainView: View {
 }
 
 // MARK: - Home View
-// MARK: - Home View
 struct HomeView: View {
     @StateObject private var expensesViewModel = ExpensesViewModel()
     @StateObject private var incomesViewModel = IncomesViewModel()
@@ -74,59 +73,67 @@ struct HomeView: View {
                             .padding(16.0)
                         }
                     }
+                    .padding(.top, -50) // Ensure the image is the first thing on top
 
-                    Divider().padding(.horizontal)
-
-                    
                     Divider().padding(.horizontal)
 
                     // Last 3 Expenses Section with View All button in the same row
-                    HStack {
-                        CardSectionView(
-                            title: "Last 3 Expenses",
-                            items: expensesViewModel.expenses.prefix(3),
-                            isLoading: expensesViewModel.isLoading,
-                            errorMessage: expensesViewModel.errorMessage,
-                            cardContent: { expense in
-                                ExpenseCard(expense: expense)
-                            },
-                            navigationDestination: AllExpensesView()
-                        )
-                        Spacer()
-                        NavigationLink(destination: AllExpensesView()) {
-                            Text("View All")
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Text("Last 3 Expenses")
+                                .font(.headline)
                                 .foregroundColor(.mostImportantColor)
-                                .padding(.leading)
-                                .font(.subheadline)
+                            Spacer()
+                            NavigationLink(destination: AllExpensesView()) {
+                                Text("View All")
+                                    .foregroundColor(.mostImportantColor)
+                                    .font(.subheadline)
+                            }
                         }
-                        .padding(.bottom)
+                        .padding(.horizontal)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                ForEach(expensesViewModel.expenses.prefix(3)) { expense in
+                                    ExpenseCard(expense: expense)
+                                        .frame(width: UIScreen.main.bounds.width * 0.8)
+                                        .padding(.horizontal)
+                                }
+                            }
+                        }
                     }
+                    .padding(.horizontal)
 
                     Divider().padding(.horizontal)
 
                     // Last 3 Incomes Section with View All button in the same row
-                    HStack {
-                        CardSectionView(
-                            title: "Last 3 Incomes",
-                            items: incomesViewModel.incomes.prefix(3),
-                            isLoading: incomesViewModel.isLoading,
-                            errorMessage: incomesViewModel.errorMessage,
-                            cardContent: { income in
-                                IncomeCard(income: income)
-                            },
-                            navigationDestination: AllIncomesView()
-                        )
-                        Spacer()
-                        NavigationLink(destination: AllIncomesView()) {
-                            Text("View All")
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Text("Last 3 Incomes")
+                                .font(.headline)
                                 .foregroundColor(.mostImportantColor)
-                                .padding(.leading)
-                                .font(.subheadline)
+                            Spacer()
+                            NavigationLink(destination: AllIncomesView()) {
+                                Text("View All")
+                                    .foregroundColor(.mostImportantColor)
+                                    .font(.subheadline)
+                            }
                         }
-                        .padding(.bottom)
+                        .padding(.horizontal)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                ForEach(incomesViewModel.incomes.prefix(3)) { income in
+                                    IncomeCard(income: income)
+                                        .frame(width: UIScreen.main.bounds.width * 0.8)
+                                        .padding(.horizontal)
+                                }
+                            }
+                        }
                     }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
+                .padding(.vertical)
             }
             .onAppear {
                 if let token = UserDefaults.standard.string(forKey: "access_token") {
@@ -148,8 +155,6 @@ struct HomeView: View {
             .sheet(isPresented: $showAddExpenseOrIncome) {
                 AddExpenseOrIncomeView()
             }
-            .navigationTitle("Home")
-            .foregroundColor(.mostImportantColor)
             .background(Color.sand) // Background color of the screen
             .edgesIgnoringSafeArea(.all) // Optional, if you want to extend the background to the edges
         }
@@ -212,9 +217,7 @@ struct BalanceCardView: View {
     }
 }
 
-// MARK: - Progress Bar (Custom)
-
-// MARK: - Expense and Income Cards
+// ExpenseCard
 struct ExpenseCard: View {
     var expense: Expense
     
@@ -235,45 +238,35 @@ struct ExpenseCard: View {
     }
     
     var body: some View {
-        HStack {
-            // Affichage d'une icône de catégorie
-            Image(systemName: "tag.fill")
-                .font(.title)
-                .foregroundColor(.mostImportantColor)
-                .frame(width: 40, height: 40)
-                .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
-                .padding(.trailing, 10)
-            
-            // Informations sur la dépense
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "tag.fill")
+                    .font(.title)
+                    .foregroundColor(.mostImportantColor)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
+                    .padding(.trailing, 10)
+                
+                VStack(alignment: .leading) {
                     Text(expense.description)
                         .font(.headline)
                         .foregroundColor(.black)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     
-                    Spacer()
-                    
-                    Text("$\(expense.amount, specifier: "%.2f")")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.red)
-                }
-                
-                HStack {
-                    Text("Date:")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    Spacer()
                     Text(formattedDate(from: expense.date))
                         .font(.subheadline)
-                        .foregroundColor(.black)
+                        .foregroundColor(.gray)
                 }
+                
+                Spacer()
+                
+                Text("$\(expense.amount, specifier: "%.2f")")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.red)
             }
             .padding(.vertical, 10)
-            
-            Spacer()
         }
         .padding()
         .background(Color.white)
@@ -281,14 +274,10 @@ struct ExpenseCard: View {
         .shadow(radius: 5)
         .padding(.horizontal)
         .frame(maxWidth: .infinity) // Utilisation de la largeur maximale de la carte
-        .overlay( // Ajout d'une ligne en bas de la carte
-            Divider()
-                .background(Color.gray)
-                .padding(.top, 10),
-            alignment: .bottom
-        )
     }
 }
+
+// IncomeCard
 struct IncomeCard: View {
     var income: Income
     
@@ -309,46 +298,35 @@ struct IncomeCard: View {
     }
     
     var body: some View {
-        HStack {
-            // Icône de catégorie
-            Image(systemName: "dollarsign.circle.fill")
-                .font(.title)
-                .foregroundColor(.mostImportantColor) // Utilisation de la couleur importante
-                .frame(width: 40, height: 40)
-                .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
-                .padding(.trailing, 10)
-            
-            // Détails du revenu
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "dollarsign.circle.fill")
+                    .font(.title)
+                    .foregroundColor(.mostImportantColor) // Utilisation de la couleur importante
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
+                    .padding(.trailing, 10)
+                
+                VStack(alignment: .leading) {
                     Text(income.description)
                         .font(.headline)
                         .foregroundColor(.black)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     
-                    Spacer()
-                    
-                    Text("$\(income.amount, specifier: "%.2f")")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.green)
-                        
-                }
-                
-                HStack {
-                    Text("Date:")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    Spacer()
                     Text(formattedDate(from: income.date))
                         .font(.subheadline)
-                        .foregroundColor(.black)
+                        .foregroundColor(.gray)
                 }
+                
+                Spacer()
+                
+                Text("$\(income.amount, specifier: "%.2f")")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.green)
             }
             .padding(.vertical, 10)
-            
-            Spacer()
         }
         .padding()
         .background(Color.white)
@@ -356,12 +334,6 @@ struct IncomeCard: View {
         .shadow(radius: 5)
         .padding(.horizontal)
         .frame(maxWidth: .infinity) // Utilisation de la largeur maximale
-        .overlay( // Ajout d'une ligne en bas de la carte
-            Divider()
-                .background(Color.gray)
-                .padding(.top, 10),
-            alignment: .bottom
-        )
     }
 }
 
