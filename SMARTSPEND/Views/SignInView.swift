@@ -27,6 +27,7 @@ struct SignInView: View {
     @State private var errorMessage: String?
     @State private var successMessage: String?
     @State private var navigateToHome: Bool = false // Navigation state
+    @State private var rememberMe: Bool = false
 
     var body: some View {
         NavigationView {
@@ -78,6 +79,14 @@ struct SignInView: View {
                         )
                 }
                 .padding(.horizontal, 30)
+
+                // Remember Me Toggle
+                Toggle(isOn: $rememberMe) {
+                    Text("Remember Me")
+                        .foregroundColor(Self.supportingColor)
+                }
+                .padding(.horizontal, 30)
+                .padding(.top, 10)
 
                 // Error Message
                 if let errorMessage = errorMessage {
@@ -140,10 +149,27 @@ struct SignInView: View {
                 NavigationLink(
                     destination: MainView().navigationBarBackButtonHidden(true),
                     isActive: $navigateToHome,
-                   
                     label: { EmptyView() }
                 )
             )
+            .onAppear {
+                checkRememberedUser()
+            }
+        }
+    }
+
+    // Check if the user is remembered and the token is still valid
+    private func checkRememberedUser() {
+        if let savedUsername = UserDefaults.standard.string(forKey: "saved_username"),
+           let savedPassword = UserDefaults.standard.string(forKey: "saved_password"),
+           let tokenTimestamp = UserDefaults.standard.object(forKey: "token_timestamp") as? Date {
+            let currentTime = Date()
+            let timeDifference = currentTime.timeIntervalSince(tokenTimestamp)
+            if timeDifference < 12 * 60 * 60 { // 12 hours in seconds
+                username = savedUsername
+                password = savedPassword
+                signIn()
+            }
         }
     }
 
@@ -194,6 +220,14 @@ struct SignInView: View {
                            let token = jsonResponse["access_token"] as? String {
                             // Save the token locally in UserDefaults
                             UserDefaults.standard.setValue(token, forKey: "access_token")
+                            UserDefaults.standard.setValue(Date(), forKey: "token_timestamp")
+                            if rememberMe {
+                                UserDefaults.standard.setValue(username, forKey: "saved_username")
+                                UserDefaults.standard.setValue(password, forKey: "saved_password")
+                            } else {
+                                UserDefaults.standard.removeObject(forKey: "saved_username")
+                                UserDefaults.standard.removeObject(forKey: "saved_password")
+                            }
                             let ttt = UserDefaults.standard.string(forKey: "access_token")
                             print("Successfully logged in! Token: \(ttt)")
 

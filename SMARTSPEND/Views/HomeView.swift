@@ -229,9 +229,9 @@ struct ExpenseCard: View {
         formatter.dateFormat = "yyyy-MM-dd"  // Assurez-vous que la date soit dans ce format
         
         if let date = formatter.date(from: string) {
-            return dateFormatter.string(from: date)  // Retourne la date formatée
+            return dateFormatter.string(from: date).prefix(10).description  // Retourne les 10 premiers caractères de la date formatée
         }
-        return string  // Si la conversion échoue, retourne la chaîne d'origine
+        return string.prefix(10).description  // Si la conversion échoue, retourne les 10 premiers caractères de la chaîne d'origine
     }
     
     var body: some View {
@@ -303,9 +303,9 @@ struct IncomeCard: View {
         formatter.dateFormat = "yyyy-MM-dd"  // Assurez-vous que la date soit dans ce format
         
         if let date = formatter.date(from: string) {
-            return dateFormatter.string(from: date)  // Retourne la date formatée
+            return dateFormatter.string(from: date).prefix(10).description  // Retourne les 10 premiers caractères de la date formatée
         }
-        return string  // Si la conversion échoue, retourne la chaîne d'origine
+        return string.prefix(10).description  // Si la conversion échoue, retourne les 10 premiers caractères de la chaîne d'origine
     }
     
     var body: some View {
