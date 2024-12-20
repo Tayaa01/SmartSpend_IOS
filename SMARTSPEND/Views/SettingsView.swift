@@ -18,6 +18,9 @@ struct settingsView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 20) {
+                            // Currency Picker
+                            currencyPicker()
+                            
                             // Section Profil
                             SettingsSection(title: "Profile", items: [
                                 SettingsItem(title: "My Profile", icon: "person.fill", action: {}),
@@ -42,14 +45,6 @@ struct settingsView: View {
                                     showContactUsView = true
                                 })
                             ])
-                            
-                            // Section Currency
-                            SettingsSection(title: "Currency", items: [
-                                SettingsItem(title: "Select Currency", icon: "dollarsign.circle.fill", action: {})
-                            ])
-                            
-                            // Currency Picker
-                            currencyPicker()
                         }
                         .padding()
                         .background(
@@ -101,6 +96,10 @@ struct settingsView: View {
             .pickerStyle(SegmentedPickerStyle())
             .padding(.horizontal)
         }
+        .padding()
+        .background(Color.white.opacity(0.9))
+        .cornerRadius(15)
+        .shadow(color: .gray.opacity(0.2), radius: 10, x: 0, y: 5)
     }
 }
 
