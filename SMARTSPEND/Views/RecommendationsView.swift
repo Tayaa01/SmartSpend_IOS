@@ -57,98 +57,51 @@ struct RecommendationsView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.headline)
-                        .padding()
-                        .multilineTextAlignment(.center)
-                } else {
-                    VStack(alignment: .leading, spacing: 15) {
-                        // Title with a subtle gradient background
-                        HStack {
-                            Image(systemName: "lightbulb.fill")
-                                .foregroundColor(.yellow)
-                                .font(.title)
-                            Text("Your Recommendations")
-                                .font(.title2)
-                                .fontWeight(.bold)
+            ZStack {
+                // Background
+                LinearGradient(gradient: Gradient(colors: [.sand, .sand.opacity(0.6)]),
+                               startPoint: .topLeading,
+                               endPoint: .bottomTrailing)
+                    .ignoresSafeArea()
+
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Recommended Actions")
+                        .font(.largeTitle)
+                        .bold()
+                        .foregroundColor(.mostImportantColor)
+                        .padding(.top, 30)
+                        .padding(.horizontal)
+
+                    ScrollView {
+                        VStack(spacing: 15) {
+                            // Example recommendation card
+                            RecommendationCard(
+                                title: "Reduce Dining Out",
+                                message: "Cut back on restaurant expenses by cooking at home more often.",
+                                color: .teal
+                            )
+                            RecommendationCard(
+                                title: "Cancel Unused Subscriptions",
+                                message: "Review all your monthly subscriptions and cancel those you barely use.",
+                                color: .navy
+                            )
+                            RecommendationCard(
+                                title: "Use Cashback Apps",
+                                message: "Try cashback or coupon apps to save on regular purchases.",
+                                color: .red
+                            )
+                            RecommendationCard(
+                                title: "Consider Carpooling",
+                                message: "Share rides for daily commutes to save on fuel and maintenance costs.",
+                                color: .leastImportantColor
+                            )
+                            // ...existing code or more cards...
                         }
-                        .padding()
-                        .background(LinearGradient(gradient: Gradient(colors: [Color.white, Color.gray.opacity(0.2)]), startPoint: .leading, endPoint: .trailing))
-                        .cornerRadius(12)
-                        .shadow(radius: 4)
-                        
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 15) {
-                                Text(recommendationText)
-                                    .padding()
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.white)
-                                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                                    )
-                                    .multilineTextAlignment(.leading)
-                                    .font(.body)
-                                    .padding(.top, 20) // Move the text a bit lower
-                                
-                                // Additional Section for Tips
-                                VStack(alignment: .leading, spacing: 10) {
-                                    Text("Tips for Better Financial Management")
-                                        .font(.headline)
-                                        .foregroundColor(.mostImportantColor)
-                                    
-                                    HStack {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                        Text("Track your expenses regularly.")
-                                            .font(.body)
-                                            .foregroundColor(.black)
-                                    }
-                                    
-                                    HStack {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                        Text("Set a monthly budget and stick to it.")
-                                            .font(.body)
-                                            .foregroundColor(.black)
-                                    }
-                                    
-                                    HStack {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                        Text("Save at least 20% of your income.")
-                                            .font(.body)
-                                            .foregroundColor(.black)
-                                    }
-                                }
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white)
-                                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                                )
-                                .padding(.top, 20)
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                        .padding(.top, 10)
+                        .padding(.horizontal)
                     }
-                    .padding([.leading, .trailing], 20)
                 }
-                
-                Spacer()
             }
-            .onAppear {
-                fetchRecommendations()
-            }
-            .navigationTitle("Recommendations")
-            .navigationBarTitleDisplayMode(.inline)
-            .background(
-                LinearGradient(gradient: Gradient(colors: [Color.sand, Color.sand.opacity(0.7)]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .edgesIgnoringSafeArea(.all)
-            ) // Set the background to a gradient
+            .navigationBarTitle("Recommendations", displayMode: .inline)
         }
     }
 }
@@ -156,6 +109,30 @@ struct RecommendationsView: View {
 // Decodable structure for API response
 struct RecommendationResponse: Decodable {
     let recommendationText: String
+}
+
+struct RecommendationCard: View {
+    let title: String
+    let message: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.white)
+
+            Text(message)
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.9))
+
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(color.opacity(0.8))
+        .cornerRadius(12)
+        .shadow(color: color.opacity(0.4), radius: 4, x: 2, y: 2)
+    }
 }
 
 struct RecommendationsView_Previews: PreviewProvider {
