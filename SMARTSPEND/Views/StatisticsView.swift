@@ -14,54 +14,56 @@ struct StatisticsView: View {
     static let mostImportantColor = Color(red: 47 / 255, green: 126 / 255, blue: 121 / 255)
     
     var body: some View {
-        VStack {
-            if expensesViewModel.isLoading || incomesViewModel.isLoading {
-                ProgressView("Loading statistics...")
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .padding()
-            } else if let errorMessage = expensesViewModel.errorMessage ?? incomesViewModel.errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
-            } else {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        Spacer(minLength: 30)
+        NavigationView {
+            VStack {
+                if (expensesViewModel.isLoading || incomesViewModel.isLoading) {
+                    ProgressView("Loading statistics...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .padding()
+                } else if let errorMessage = expensesViewModel.errorMessage ?? incomesViewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            Spacer(minLength: 30)
 
-                        // Section Résumé
-                        StatSectionView(
-                            title: "Summary",
-                            stats: [
-                                StatData(title: "Total Expenses", value: totalExpensesAmount, color: .red, icon: "arrow.down.circle.fill"),
-                                StatData(title: "Total Incomes", value: totalIncomesAmount, color: .green, icon: "arrow.up.circle.fill"),
-                                StatData(title: "Net Balance", value: netBalanceAmount, color: netBalanceAmount < 0 ? .red : .green, icon: "equal.circle.fill")
-                            ]
-                        )
+                            // Section Résumé
+                            StatSectionView(
+                                title: "Summary",
+                                stats: [
+                                    StatData(title: "Total Expenses", value: totalExpensesAmount, color: .red, icon: "arrow.down.circle.fill"),
+                                    StatData(title: "Total Incomes", value: totalIncomesAmount, color: .green, icon: "arrow.up.circle.fill"),
+                                    StatData(title: "Net Balance", value: netBalanceAmount, color: netBalanceAmount < 0 ? .red : .green, icon: "equal.circle.fill")
+                                ]
+                            )
 
-                        // Progress bar pour la comparaison Dépenses vs Revenus
-                        progressBarSection()
+                            // Progress bar pour la comparaison Dépenses vs Revenus
+                            progressBarSection()
 
-                        // Autres Statistiques
-                        detailedInsightsSection()
+                            // Autres Statistiques
+                            detailedInsightsSection()
+                        }
+                        .padding()
                     }
-                    .padding()
                 }
             }
-        }
-        .background(Self.sand)
-        .edgesIgnoringSafeArea(.all)
-        .onAppear {
-            if let token = UserDefaults.standard.string(forKey: "access_token") {
-                expensesViewModel.fetchExpenses(token: token)
-                incomesViewModel.fetchIncomes(token: token)
-            } else {
-                expensesViewModel.errorMessage = "User not logged in."
-                incomesViewModel.errorMessage = "User not logged in."
+            .background(Self.sand)
+            .edgesIgnoringSafeArea(.all)
+            .onAppear {
+                if let token = UserDefaults.standard.string(forKey: "access_token") {
+                    expensesViewModel.fetchExpenses(token: token)
+                    incomesViewModel.fetchIncomes(token: token)
+                } else {
+                    expensesViewModel.errorMessage = "User not logged in."
+                    incomesViewModel.errorMessage = "User not logged in."
+                }
             }
+            .navigationTitle("Statistics")
+            .onChange(of: expensesViewModel.expenses) { _ in updateStatistics() }
+            .onChange(of: incomesViewModel.incomes) { _ in updateStatistics() }
         }
-        .navigationTitle("Statistics")
-        .onChange(of: expensesViewModel.expenses) { _ in updateStatistics() }
-        .onChange(of: incomesViewModel.incomes) { _ in updateStatistics() }
     }
     
     private func updateStatistics() {
