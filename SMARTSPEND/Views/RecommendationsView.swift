@@ -92,6 +92,44 @@ struct RecommendationsView: View {
                                     .multilineTextAlignment(.leading)
                                     .font(.body)
                                     .padding(.top, 20) // Move the text a bit lower
+                                
+                                // Additional Section for Tips
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Tips for Better Financial Management")
+                                        .font(.headline)
+                                        .foregroundColor(.mostImportantColor)
+                                    
+                                    HStack {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                        Text("Track your expenses regularly.")
+                                            .font(.body)
+                                            .foregroundColor(.black)
+                                    }
+                                    
+                                    HStack {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                        Text("Set a monthly budget and stick to it.")
+                                            .font(.body)
+                                            .foregroundColor(.black)
+                                    }
+                                    
+                                    HStack {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                        Text("Save at least 20% of your income.")
+                                            .font(.body)
+                                            .foregroundColor(.black)
+                                    }
+                                }
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.white)
+                                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                                )
+                                .padding(.top, 20)
                             }
                             .padding(.horizontal, 20)
                         }
@@ -107,8 +145,10 @@ struct RecommendationsView: View {
             }
             .navigationTitle("Recommendations")
             .navigationBarTitleDisplayMode(.inline)
-            .background(Color.sand) // Set the background to sand color
-            .edgesIgnoringSafeArea(.bottom) // Make sure it covers the whole screen except the top
+            .background(
+                LinearGradient(gradient: Gradient(colors: [Color.sand, Color.sand.opacity(0.7)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                    .edgesIgnoringSafeArea(.all)
+            ) // Set the background to a gradient
         }
     }
 }

@@ -96,7 +96,7 @@ struct HomeView: View {
                             HStack(spacing: 16) {
                                 ForEach(expensesViewModel.expenses.prefix(3)) { expense in
                                     ExpenseCard(expense: expense)
-                                        .frame(width: UIScreen.main.bounds.width * 0.8)
+                                        .frame(width: UIScreen.main.bounds.width * 0.9)
                                         .padding(.horizontal)
                                 }
                             }
@@ -125,7 +125,7 @@ struct HomeView: View {
                             HStack(spacing: 16) {
                                 ForEach(incomesViewModel.incomes.prefix(3)) { income in
                                     IncomeCard(income: income)
-                                        .frame(width: UIScreen.main.bounds.width * 0.8)
+                                        .frame(width: UIScreen.main.bounds.width * 0.9)
                                         .padding(.horizontal)
                                 }
                             }
@@ -178,7 +178,7 @@ struct BalanceCardView: View {
                     .foregroundColor(.white)
 
                 let balance = totalIncome - totalExpenses
-                Text("$\(balance, specifier: "%.2f")")
+                Text("\(balance, specifier: "%.2f")")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(balance >= 0 ? .lightGreen : .red)
@@ -188,7 +188,7 @@ struct BalanceCardView: View {
                         Text("Expenses")
                             .font(.subheadline)
                             .foregroundColor(.white)
-                        Text("-$\(totalExpenses, specifier: "%.2f")")
+                        Text("-\(totalExpenses, specifier: "%.2f")")
                             .font(.headline)
                             .foregroundColor(.red)
                     }
@@ -202,7 +202,7 @@ struct BalanceCardView: View {
                         Text("Income")
                             .font(.subheadline)
                             .foregroundColor(.white)
-                        Text("+$\(totalIncome, specifier: "%.2f")")
+                        Text("+\(totalIncome, specifier: "%.2f")")
                             .font(.headline)
                             .foregroundColor(.lightGreen)
                     }
@@ -212,7 +212,7 @@ struct BalanceCardView: View {
             }
             .padding()
         }
-        .frame(maxWidth: 300, maxHeight: 180) // Increased card width and height
+        .frame(maxWidth: 350, maxHeight: 200) // Increased card width and height
         .offset(y: 50) // Lower the card by adding vertical offset
     }
 }
@@ -238,7 +238,7 @@ struct ExpenseCard: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "tag.fill")
                     .font(.title)
@@ -247,7 +247,7 @@ struct ExpenseCard: View {
                     .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
                     .padding(.trailing, 10)
                 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(expense.description)
                         .font(.headline)
                         .foregroundColor(.black)
@@ -261,7 +261,7 @@ struct ExpenseCard: View {
                 
                 Spacer()
                 
-                Text("$\(expense.amount, specifier: "%.2f")")
+                Text("\(expense.amount, specifier: "%.2f")")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.red)
@@ -298,7 +298,7 @@ struct IncomeCard: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "dollarsign.circle.fill")
                     .font(.title)
@@ -307,7 +307,7 @@ struct IncomeCard: View {
                     .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
                     .padding(.trailing, 10)
                 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(income.description)
                         .font(.headline)
                         .foregroundColor(.black)
@@ -321,7 +321,7 @@ struct IncomeCard: View {
                 
                 Spacer()
                 
-                Text("$\(income.amount, specifier: "%.2f")")
+                Text("\(income.amount, specifier: "%.2f")")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.green)

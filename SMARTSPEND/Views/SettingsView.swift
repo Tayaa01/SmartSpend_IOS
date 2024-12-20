@@ -8,6 +8,7 @@ struct settingsView: View {
     @State private var showPrivacyPolicyView = false
     @State private var showTermsOfServiceView = false
     @State private var showContactUsView = false
+    @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
 
     var body: some View {
         NavigationView {
@@ -41,6 +42,14 @@ struct settingsView: View {
                                     showContactUsView = true
                                 })
                             ])
+                            
+                            // Section Currency
+                            SettingsSection(title: "Currency", items: [
+                                SettingsItem(title: "Select Currency", icon: "dollarsign.circle.fill", action: {})
+                            ])
+                            
+                            // Currency Picker
+                            currencyPicker()
                         }
                         .padding()
                         .background(
@@ -75,6 +84,23 @@ struct settingsView: View {
 
     private func logout() {
         isLoggedOut = true
+    }
+    
+    private func currencyPicker() -> some View {
+        VStack(alignment: .leading) {
+            Text("Select Currency")
+                .font(.headline)
+                .padding(.leading)
+            
+            Picker("Currency", selection: $selectedCurrency) {
+                Text("USD").tag("USD")
+                Text("EUR").tag("EUR")
+                Text("GBP").tag("GBP")
+                // Add more currencies as needed
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.horizontal)
+        }
     }
 }
 

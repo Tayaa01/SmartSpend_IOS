@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 
 struct StatisticsView: View {
     @StateObject private var expensesViewModel = ExpensesViewModel()
@@ -44,13 +45,19 @@ struct StatisticsView: View {
 
                             // Autres Statistiques
                             detailedInsightsSection()
+                            
+                            // Additional Statistics
+                            additionalStatisticsSection()
+
+                            // Charts and Graphs
+                            chartsAndGraphsSection()
                         }
                         .padding()
                     }
                 }
             }
             .background(Self.sand)
-            .edgesIgnoringSafeArea(.all)
+            .edgesIgnoringSafeArea(.bottom)
             .onAppear {
                 if let token = UserDefaults.standard.string(forKey: "access_token") {
                     expensesViewModel.fetchExpenses(token: token)
@@ -61,6 +68,7 @@ struct StatisticsView: View {
                 }
             }
             .navigationTitle("Statistics")
+            .navigationBarTitleDisplayMode(.inline)
             .onChange(of: expensesViewModel.expenses) { _ in updateStatistics() }
             .onChange(of: incomesViewModel.incomes) { _ in updateStatistics() }
         }
@@ -112,6 +120,42 @@ struct StatisticsView: View {
                 ProgressCard(title: "Average Expenses", value: totalExpensesAmount / Double(max(1, expensesViewModel.expenses.count)), total: totalExpensesAmount, color: .red)
                 ProgressCard(title: "Average Incomes", value: totalIncomesAmount / Double(max(1, incomesViewModel.incomes.count)), total: totalIncomesAmount, color: .green)
             }
+        }
+    }
+    
+    private func additionalStatisticsSection() -> some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Additional Statistics")
+                .font(.headline)
+                .padding(.leading)
+            
+            HStack {
+                ProgressCard(title: "Highest Expense", value: expensesViewModel.expenses.map { $0.amount }.max() ?? 0, total: totalExpensesAmount, color: .red)
+                ProgressCard(title: "Highest Income", value: incomesViewModel.incomes.map { $0.amount }.max() ?? 0, total: totalIncomesAmount, color: .green)
+            }
+            
+            HStack {
+                ProgressCard(title: "Lowest Expense", value: expensesViewModel.expenses.map { $0.amount }.min() ?? 0, total: totalExpensesAmount, color: .red)
+                ProgressCard(title: "Lowest Income", value: incomesViewModel.incomes.map { $0.amount }.min() ?? 0, total: totalIncomesAmount, color: .green)
+            }
+        }
+    }
+
+    private func chartsAndGraphsSection() -> some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Charts and Graphs")
+                .font(.headline)
+                .padding(.leading)
+            
+            // Example Pie Chart
+            PieChartView(data: expensesViewModel.expenses.map { $0.amount }, labels: expensesViewModel.expenses.map { $0.description })
+                .frame(height: 300)
+                .padding(.horizontal)
+            
+            // Example Bar Chart
+            BarChartView(data: expensesViewModel.expenses.map { $0.amount }, labels: expensesViewModel.expenses.map { $0.description })
+                .frame(height: 300)
+                .padding(.horizontal)
         }
     }
 }
@@ -244,6 +288,43 @@ struct ProgressBar: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
+    }
+}
+
+struct PieChartView: View {
+    var data: [Double]
+    var labels: [String]
+    
+    var body: some View {
+        Chart {
+            ForEach(0..<data.count, id: \.self) { index in
+                SectorMark(
+                    angle: .value("Amount", data[index]),
+                    innerRadius: .ratio(0.5),
+                    outerRadius: .ratio(1.0)
+                )
+                .foregroundStyle(by: .value("Label", labels[index]))
+            }
+        }
+        .chartLegend(.visible)
+    }
+}
+
+struct BarChartView: View {
+    var data: [Double]
+    var labels: [String]
+    
+    var body: some View {
+        Chart {
+            ForEach(0..<data.count, id: \.self) { index in
+                BarMark(
+                    x: .value("Label", labels[index]),
+                    y: .value("Amount", data[index])
+                )
+                .foregroundStyle(by: .value("Label", labels[index]))
+            }
+        }
+        .chartLegend(.visible)
     }
 }
 
