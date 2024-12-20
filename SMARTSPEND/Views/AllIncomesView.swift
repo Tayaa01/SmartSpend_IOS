@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AllIncomesView: View {
     @StateObject private var incomesViewModel = IncomesViewModel()
+    @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
     
     var body: some View {
         VStack {
@@ -25,7 +26,7 @@ struct AllIncomesView: View {
                         .padding()
                 } else {
                     List(incomesViewModel.incomes) { income in
-                        IncomeCard(income: income)
+                        IncomeCard(income: income, currency: selectedCurrency)
                             .padding(.vertical, 5)
                     }
                     .listStyle(PlainListStyle())

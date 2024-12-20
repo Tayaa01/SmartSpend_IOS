@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AllExpensesView: View {
     @StateObject private var expensesViewModel = ExpensesViewModel()  // Utilisation du ViewModel pour gérer les dépenses
+    @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
     @State private var showErrorMessage = false
     
     var body: some View {
@@ -31,7 +32,7 @@ struct AllExpensesView: View {
                         .padding()
                 } else {
                     List(expensesViewModel.expenses) { expense in
-                        ExpenseCard(expense: expense)
+                        ExpenseCard(expense: expense, currency: selectedCurrency)
                             .padding(.vertical, 5)
                     }
                     .listStyle(PlainListStyle())
@@ -70,5 +71,3 @@ struct AllExpensesView_Previews: PreviewProvider {
         AllExpensesView()
     }
 }
-
-// Carte pour chaque dépense

@@ -50,6 +50,7 @@ struct HomeView: View {
     @StateObject private var expensesViewModel = ExpensesViewModel()
     @StateObject private var incomesViewModel = IncomesViewModel()
     @State private var showAddExpenseOrIncome: Bool = false
+    @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
 
     var body: some View {
         NavigationView {
@@ -68,7 +69,8 @@ struct HomeView: View {
 
                             BalanceCardView(
                                 totalIncome: incomesViewModel.totalIncome,
-                                totalExpenses: expensesViewModel.totalExpenses
+                                totalExpenses: expensesViewModel.totalExpenses,
+                                currency: selectedCurrency
                             )
                             .padding(16.0)
                         }
@@ -95,7 +97,7 @@ struct HomeView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
                                 ForEach(expensesViewModel.expenses.prefix(3)) { expense in
-                                    ExpenseCard(expense: expense)
+                                    ExpenseCard(expense: expense, currency: selectedCurrency)
                                         .frame(width: UIScreen.main.bounds.width * 0.9)
                                         .padding(.horizontal)
                                 }
@@ -124,7 +126,7 @@ struct HomeView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
                                 ForEach(incomesViewModel.incomes.prefix(3)) { income in
-                                    IncomeCard(income: income)
+                                    IncomeCard(income: income, currency: selectedCurrency)
                                         .frame(width: UIScreen.main.bounds.width * 0.9)
                                         .padding(.horizontal)
                                 }
@@ -165,6 +167,20 @@ struct HomeView: View {
 struct BalanceCardView: View {
     var totalIncome: Double
     var totalExpenses: Double
+    var currency: String
+
+    private func currencySymbol() -> String {
+        switch currency {
+        case "USD":
+            return "$"
+        case "EUR":
+            return "€"
+        case "GBP":
+            return "£"
+        default:
+            return "$"
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -178,7 +194,7 @@ struct BalanceCardView: View {
                     .foregroundColor(.white)
 
                 let balance = totalIncome - totalExpenses
-                Text("\(balance, specifier: "%.2f")")
+                Text("\(currencySymbol())\(balance, specifier: "%.2f")")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(balance >= 0 ? .lightGreen : .red)
@@ -188,7 +204,7 @@ struct BalanceCardView: View {
                         Text("Expenses")
                             .font(.subheadline)
                             .foregroundColor(.white)
-                        Text("-\(totalExpenses, specifier: "%.2f")")
+                        Text("-\(currencySymbol())\(totalExpenses, specifier: "%.2f")")
                             .font(.headline)
                             .foregroundColor(.red)
                     }
@@ -202,7 +218,7 @@ struct BalanceCardView: View {
                         Text("Income")
                             .font(.subheadline)
                             .foregroundColor(.white)
-                        Text("+\(totalIncome, specifier: "%.2f")")
+                        Text("+\(currencySymbol())\(totalIncome, specifier: "%.2f")")
                             .font(.headline)
                             .foregroundColor(.lightGreen)
                     }
@@ -220,6 +236,7 @@ struct BalanceCardView: View {
 // ExpenseCard
 struct ExpenseCard: View {
     var expense: Expense
+    var currency: String
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -235,6 +252,19 @@ struct ExpenseCard: View {
             return dateFormatter.string(from: date).prefix(10).description  // Retourne les 10 premiers caractères de la date formatée
         }
         return string.prefix(10).description  // Si la conversion échoue, retourne les 10 premiers caractères de la chaîne d'origine
+    }
+    
+    private func currencySymbol() -> String {
+        switch currency {
+        case "USD":
+            return "$"
+        case "EUR":
+            return "€"
+        case "GBP":
+            return "£"
+        default:
+            return "$"
+        }
     }
     
     var body: some View {
@@ -261,7 +291,7 @@ struct ExpenseCard: View {
                 
                 Spacer()
                 
-                Text("\(expense.amount, specifier: "%.2f")")
+                Text("\(currencySymbol())\(expense.amount, specifier: "%.2f")")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.red)
@@ -280,6 +310,7 @@ struct ExpenseCard: View {
 // IncomeCard
 struct IncomeCard: View {
     var income: Income
+    var currency: String
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -295,6 +326,19 @@ struct IncomeCard: View {
             return dateFormatter.string(from: date).prefix(10).description  // Retourne les 10 premiers caractères de la date formatée
         }
         return string.prefix(10).description  // Si la conversion échoue, retourne les 10 premiers caractères de la chaîne d'origine
+    }
+    
+    private func currencySymbol() -> String {
+        switch currency {
+        case "USD":
+            return "$"
+        case "EUR":
+            return "€"
+        case "GBP":
+            return "£"
+        default:
+            return "$"
+        }
     }
     
     var body: some View {
@@ -321,7 +365,7 @@ struct IncomeCard: View {
                 
                 Spacer()
                 
-                Text("\(income.amount, specifier: "%.2f")")
+                Text("\(currencySymbol())\(income.amount, specifier: "%.2f")")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.green)

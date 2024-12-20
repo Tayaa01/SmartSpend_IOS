@@ -8,6 +8,7 @@ struct StatisticsView: View {
     @State private var totalExpensesAmount: Double = 0
     @State private var totalIncomesAmount: Double = 0
     @State private var netBalanceAmount: Double = 0
+    @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
     
     // Couleurs
     static let sand = Color(red: 229 / 255, green: 221 / 255, blue: 200 / 255)
@@ -37,7 +38,8 @@ struct StatisticsView: View {
                                     StatData(title: "Total Expenses", value: totalExpensesAmount, color: .red, icon: "arrow.down.circle.fill"),
                                     StatData(title: "Total Incomes", value: totalIncomesAmount, color: .green, icon: "arrow.up.circle.fill"),
                                     StatData(title: "Net Balance", value: netBalanceAmount, color: netBalanceAmount < 0 ? .red : .green, icon: "equal.circle.fill")
-                                ]
+                                ],
+                                currency: selectedCurrency
                             )
 
                             // Progress bar pour la comparaison Dépenses vs Revenus
@@ -92,7 +94,7 @@ struct StatisticsView: View {
                         .font(.subheadline)
                         .foregroundColor(.red)
                     Spacer()
-                    Text("$\(totalExpensesAmount, specifier: "%.2f")")
+                    Text("\(selectedCurrency) \(totalExpensesAmount, specifier: "%.2f")")
                         .font(.caption)
                         .foregroundColor(.red)
                 }
@@ -117,8 +119,8 @@ struct StatisticsView: View {
                 .padding(.leading)
             
             HStack {
-                ProgressCard(title: "Average Expenses", value: totalExpensesAmount / Double(max(1, expensesViewModel.expenses.count)), total: totalExpensesAmount, color: .red)
-                ProgressCard(title: "Average Incomes", value: totalIncomesAmount / Double(max(1, incomesViewModel.incomes.count)), total: totalIncomesAmount, color: .green)
+                ProgressCard(title: "Average Expenses", value: totalExpensesAmount / Double(max(1, expensesViewModel.expenses.count)), total: totalExpensesAmount, color: .red, currency: selectedCurrency)
+                ProgressCard(title: "Average Incomes", value: totalIncomesAmount / Double(max(1, incomesViewModel.incomes.count)), total: totalIncomesAmount, color: .green, currency: selectedCurrency)
             }
         }
     }
@@ -130,13 +132,13 @@ struct StatisticsView: View {
                 .padding(.leading)
             
             HStack {
-                ProgressCard(title: "Highest Expense", value: expensesViewModel.expenses.map { $0.amount }.max() ?? 0, total: totalExpensesAmount, color: .red)
-                ProgressCard(title: "Highest Income", value: incomesViewModel.incomes.map { $0.amount }.max() ?? 0, total: totalIncomesAmount, color: .green)
+                ProgressCard(title: "Highest Expense", value: expensesViewModel.expenses.map { $0.amount }.max() ?? 0, total: totalExpensesAmount, color: .red, currency: selectedCurrency)
+                ProgressCard(title: "Highest Income", value: incomesViewModel.incomes.map { $0.amount }.max() ?? 0, total: totalIncomesAmount, color: .green, currency: selectedCurrency)
             }
             
             HStack {
-                ProgressCard(title: "Lowest Expense", value: expensesViewModel.expenses.map { $0.amount }.min() ?? 0, total: totalExpensesAmount, color: .red)
-                ProgressCard(title: "Lowest Income", value: incomesViewModel.incomes.map { $0.amount }.min() ?? 0, total: totalIncomesAmount, color: .green)
+                ProgressCard(title: "Lowest Expense", value: expensesViewModel.expenses.map { $0.amount }.min() ?? 0, total: totalExpensesAmount, color: .red, currency: selectedCurrency)
+                ProgressCard(title: "Lowest Income", value: incomesViewModel.incomes.map { $0.amount }.min() ?? 0, total: totalIncomesAmount, color: .green, currency: selectedCurrency)
             }
         }
     }
@@ -148,12 +150,12 @@ struct StatisticsView: View {
                 .padding(.leading)
             
             // Example Pie Chart
-            PieChartView(data: expensesViewModel.expenses.map { $0.amount }, labels: expensesViewModel.expenses.map { $0.description })
+            PieChartView(data: expensesViewModel.expenses.filter { $0.amount >= 10 }.map { $0.amount }, labels: expensesViewModel.expenses.filter { $0.amount >= 10 }.map { $0.description })
                 .frame(height: 300)
                 .padding(.horizontal)
             
             // Example Bar Chart
-            BarChartView(data: expensesViewModel.expenses.map { $0.amount }, labels: expensesViewModel.expenses.map { $0.description })
+            BarChartView(data: expensesViewModel.expenses.filter { $0.amount >= 10 }.map { $0.amount }, labels: expensesViewModel.expenses.filter { $0.amount >= 10 }.map { $0.description })
                 .frame(height: 300)
                 .padding(.horizontal)
         }
@@ -163,6 +165,7 @@ struct StatisticsView: View {
 struct StatSectionView: View {
     let title: String
     let stats: [StatData]
+    let currency: String
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -174,7 +177,7 @@ struct StatSectionView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
                     ForEach(stats) { stat in
-                        StatCard(data: stat)
+                        StatCard(data: stat, currency: currency)
                     }
                 }
                 .padding(.horizontal)
@@ -193,6 +196,7 @@ struct StatData: Identifiable {
 
 struct StatCard: View {
     let data: StatData
+    let currency: String
     
     var body: some View {
         VStack(spacing: 10) {
@@ -202,7 +206,7 @@ struct StatCard: View {
             Text(data.title)
                 .font(.subheadline)
                 .fontWeight(.medium)
-            Text("$\(data.value, specifier: "%.2f")")
+            Text("\(currency) \(data.value, specifier: "%.2f")")
                 .font(.title3)
                 .fontWeight(.bold)
                 .foregroundColor(data.color)
@@ -246,6 +250,7 @@ struct ProgressCard: View {
     let value: Double
     let total: Double
     let color: Color
+    let currency: String
     
     var body: some View {
         VStack {
@@ -255,7 +260,7 @@ struct ProgressCard: View {
             Text(title)
                 .font(.subheadline)
                 .foregroundColor(color)
-            Text("$\(value, specifier: "%.2f")")
+            Text("\(currency) \(value, specifier: "%.2f")")
                 .font(.caption)
                 .foregroundColor(color)
         }
