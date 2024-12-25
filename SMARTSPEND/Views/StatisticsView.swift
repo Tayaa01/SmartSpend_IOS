@@ -86,63 +86,141 @@ struct StatisticsView: View {
     }
     
     private func progressBarSection() -> some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 15) {
             Text("Expenses vs Incomes")
                 .font(.headline)
+                .foregroundColor(Color.mostImportantColor)
                 .padding(.leading)
             
-            VStack(spacing: 10) {
-                HStack {
-                    Text("Expenses")
-                        .font(.subheadline)
-                        .foregroundColor(.red)
-                    Spacer()
-                    Text("\(selectedCurrency) \(totalExpensesAmount, specifier: "%.2f")")
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.white)
+                    .shadow(radius: 5)
+                
+                VStack(spacing: 15) {
+                    HStack {
+                        Text("Expenses")
+                            .font(.subheadline)
+                            .foregroundColor(.red)
+                        Spacer()
+                        Text("\(selectedCurrency) \(totalExpensesAmount, specifier: "%.2f")")
+                            .font(.subheadline)
+                            .foregroundColor(.red)
+                            .bold()
+                    }
+                    
+                    ProgressBar(value: totalExpensesAmount, total: totalIncomesAmount, color: .red)
+                    
+                    Text("\(totalIncomesAmount > 0 ? Int((totalExpensesAmount / totalIncomesAmount) * 100) : 0)% of Income Spent")
                         .font(.caption)
-                        .foregroundColor(.red)
+                        .foregroundColor(Color.mostImportantColor)
                 }
-                
-                // ProgressBar combinée pour les Dépenses par rapport aux Revenus
-                ProgressBar(value: totalExpensesAmount, total: totalIncomesAmount, color: .red)
-                
-                // Affichage du pourcentage de dépenses par rapport aux revenus
-                Text("\(totalIncomesAmount > 0 ? Int((totalExpensesAmount / totalIncomesAmount) * 100) : 0)% Spent")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.top, 5)
+                .padding()
             }
             .padding(.horizontal)
         }
     }
     
     private func detailedInsightsSection() -> some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 15) {
             Text("Detailed Insights")
                 .font(.headline)
+                .foregroundColor(Color.mostImportantColor)
                 .padding(.leading)
             
-            HStack {
-                ProgressCard(title: "Average Expenses", value: totalExpensesAmount / Double(max(1, expensesViewModel.expenses.count)), total: totalExpensesAmount, color: .red, currency: selectedCurrency)
-                ProgressCard(title: "Average Incomes", value: totalIncomesAmount / Double(max(1, incomesViewModel.incomes.count)), total: totalIncomesAmount, color: .green, currency: selectedCurrency)
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.white)
+                    .shadow(radius: 5)
+                
+                HStack {
+                    ProgressCard(
+                        title: "Average Expenses",
+                        value: totalExpensesAmount / Double(max(1, expensesViewModel.expenses.count)),
+                        total: totalExpensesAmount,
+                        color: Color.mostImportantColor,
+                        currency: selectedCurrency
+                    )
+                    
+                    Divider()
+                    
+                    ProgressCard(
+                        title: "Average Income",
+                        value: totalIncomesAmount / Double(max(1, incomesViewModel.incomes.count)),
+                        total: totalIncomesAmount,
+                        color: .green,
+                        currency: selectedCurrency
+                    )
+                }
+                .padding()
             }
+            .padding(.horizontal)
         }
     }
     
     private func additionalStatisticsSection() -> some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 15) {
             Text("Additional Statistics")
                 .font(.headline)
+                .foregroundColor(Color.mostImportantColor)
                 .padding(.leading)
             
-            HStack {
-                ProgressCard(title: "Highest Expense", value: expensesViewModel.expenses.map { $0.amount }.max() ?? 0, total: totalExpensesAmount, color: .red, currency: selectedCurrency)
-                ProgressCard(title: "Highest Income", value: incomesViewModel.incomes.map { $0.amount }.max() ?? 0, total: totalIncomesAmount, color: .green, currency: selectedCurrency)
+            VStack(spacing: 15) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.white)
+                        .shadow(radius: 5)
+                    
+                    HStack {
+                        ProgressCard(
+                            title: "Highest Expense",
+                            value: expensesViewModel.expenses.map { $0.amount }.max() ?? 0,
+                            total: totalExpensesAmount,
+                            color: .red,
+                            currency: selectedCurrency
+                        )
+                        
+                        Divider()
+                        
+                        ProgressCard(
+                            title: "Highest Income",
+                            value: incomesViewModel.incomes.map { $0.amount }.max() ?? 0,
+                            total: totalIncomesAmount,
+                            color: .green,
+                            currency: selectedCurrency
+                        )
+                    }
+                    .padding()
+                }
+                
+                ZStack {
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.white)
+                        .shadow(radius: 5)
+                    
+                    HStack {
+                        ProgressCard(
+                            title: "Lowest Expense",
+                            value: expensesViewModel.expenses.map { $0.amount }.min() ?? 0,
+                            total: totalExpensesAmount,
+                            color: .red,
+                            currency: selectedCurrency
+                        )
+                        
+                        Divider()
+                        
+                        ProgressCard(
+                            title: "Lowest Income",
+                            value: incomesViewModel.incomes.map { $0.amount }.min() ?? 0,
+                            total: totalIncomesAmount,
+                            color: .green,
+                            currency: selectedCurrency
+                        )
+                    }
+                    .padding()
+                }
             }
-            
-            HStack {
-                ProgressCard(title: "Lowest Expense", value: expensesViewModel.expenses.map { $0.amount }.min() ?? 0, total: totalExpensesAmount, color: .red, currency: selectedCurrency)
-                ProgressCard(title: "Lowest Income", value: incomesViewModel.incomes.map { $0.amount }.min() ?? 0, total: totalIncomesAmount, color: .green, currency: selectedCurrency)
-            }
+            .padding(.horizontal)
         }
     }
 
@@ -186,26 +264,35 @@ struct StatisticsView: View {
 
     private func chartsAndGraphsSection() -> some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Charts and Graphs")
+            Text("Expense Distribution")
                 .font(.headline)
+                .foregroundColor(Color.mostImportantColor)
                 .padding(.leading)
             
             let groupedExpenses = groupExpensesByCategory()
             
-            // Pie Chart with grouped data
-            PieChartView(
-                data: groupedExpenses.map { $0.1 },
-                labels: groupedExpenses.map { $0.0 }
-            )
-            .frame(height: 300)
-            .padding(.horizontal)
-            
-            // Bar Chart with grouped data
-            BarChartView(
-                data: groupedExpenses.map { $0.1 },
-                labels: groupedExpenses.map { $0.0 }
-            )
-            .frame(height: 300)
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.white)
+                    .shadow(radius: 5)
+                
+                VStack(spacing: 20) {
+                    PieChartView(
+                        data: groupedExpenses.map { $0.1 },
+                        labels: groupedExpenses.map { $0.0 }
+                    )
+                    .frame(height: 300)
+                    
+                    Divider()
+                    
+                    BarChartView(
+                        data: groupedExpenses.map { $0.1 },
+                        labels: groupedExpenses.map { $0.0 }
+                    )
+                    .frame(height: 300)
+                }
+                .padding()
+            }
             .padding(.horizontal)
         }
     }
@@ -248,20 +335,26 @@ struct StatCard: View {
     let currency: String
     
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             Image(systemName: data.icon)
-                .font(.largeTitle)
+                .font(.system(size: 30))
                 .foregroundColor(data.color)
+                .frame(width: 60, height: 60)
+                .background(data.color.opacity(0.2))
+                .clipShape(Circle())
+            
             Text(data.title)
                 .font(.subheadline)
                 .fontWeight(.medium)
+                .foregroundColor(Color.mostImportantColor)
+            
             Text("\(currency) \(data.value, specifier: "%.2f")")
-                .font(.title3)
+                .font(.headline)
                 .fontWeight(.bold)
                 .foregroundColor(data.color)
         }
         .padding()
-        .frame(width: 150, height: 150)
+        .frame(width: 160, height: 160)
         .background(Color.white)
         .cornerRadius(15)
         .shadow(radius: 5)
@@ -339,9 +432,14 @@ struct ProgressBar: View {
                 .fill(color)
                 .frame(width: progress * UIScreen.main.bounds.width * 0.8, height: height)
                 .animation(.easeInOut, value: progress)
+                
+            // Add percentage label
+            Text("\(Int(progress * 100))%")
+                .font(.caption2)
+                .foregroundColor(.white)
+                .padding(.leading, 8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal)
     }
 }
 
