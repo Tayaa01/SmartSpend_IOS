@@ -160,15 +160,18 @@ struct SignInView: View {
 
     // Check if the user is remembered and the token is still valid
     private func checkRememberedUser() {
-        if let savedUsername = UserDefaults.standard.string(forKey: "saved_username"),
-           let savedPassword = UserDefaults.standard.string(forKey: "saved_password"),
+        if let token = UserDefaults.standard.string(forKey: "access_token"),
            let tokenTimestamp = UserDefaults.standard.object(forKey: "token_timestamp") as? Date {
-            let currentTime = Date()
-            let timeDifference = currentTime.timeIntervalSince(tokenTimestamp)
-            if timeDifference < 12 * 60 * 60 { // 12 hours in seconds
-                username = savedUsername
-                password = savedPassword
-                signIn()
+            
+            // Check if token is still valid (11 hours = 39600 seconds)
+            let timeElapsed = Date().timeIntervalSince(tokenTimestamp)
+            if timeElapsed < 39600 {
+                // Token still valid
+                navigateToHome = true
+            } else {
+                // Token expired
+                UserDefaults.standard.removeObject(forKey: "access_token")
+                UserDefaults.standard.removeObject(forKey: "token_timestamp")
             }
         }
     }
