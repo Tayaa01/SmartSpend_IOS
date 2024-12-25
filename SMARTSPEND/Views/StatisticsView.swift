@@ -9,6 +9,8 @@ struct StatisticsView: View {
     @State private var totalIncomesAmount: Double = 0
     @State private var netBalanceAmount: Double = 0
     @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
+    @State private var categories: [Category] = []
+    @State private var isLoadingCategories: Bool = true
     
     // Couleurs
     static let sand = Color(red: 229 / 255, green: 221 / 255, blue: 200 / 255)
@@ -64,6 +66,7 @@ struct StatisticsView: View {
                 if let token = UserDefaults.standard.string(forKey: "access_token") {
                     expensesViewModel.fetchExpenses(token: token)
                     incomesViewModel.fetchIncomes(token: token)
+                    fetchCategories() // Add categories fetch
                 } else {
                     expensesViewModel.errorMessage = "User not logged in."
                     incomesViewModel.errorMessage = "User not logged in."
@@ -143,21 +146,67 @@ struct StatisticsView: View {
         }
     }
 
+    private func fetchCategories() {
+        guard let token = UserDefaults.standard.string(forKey: "access_token") else {
+            return
+        }
+
+        let url = URL(string: "http://localhost:3000/categories")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let data = data {
+                    do {
+                        let decodedCategories = try JSONDecoder().decode([Category].self, from: data)
+                        self.categories = decodedCategories
+                        self.isLoadingCategories = false
+                    } catch {
+                        print("Failed to decode categories: \(error)")
+                    }
+                }
+            }
+        }.resume()
+    }
+
+    private func getCategoryName(for id: String) -> String {
+        categories.first(where: { $0.id == id })?.name ?? "Unknown"
+    }
+
+    private func groupExpensesByCategory() -> [(String, Double)] {
+        let grouped = Dictionary(grouping: expensesViewModel.expenses) { expense in
+            getCategoryName(for: expense.category) // Use category name instead of ID
+        }
+        .mapValues { expenses in
+            expenses.reduce(0) { $0 + $1.amount }
+        }
+        return grouped.map { ($0.key, $0.value) }.sorted { $0.1 > $1.1 }
+    }
+
     private func chartsAndGraphsSection() -> some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Charts and Graphs")
                 .font(.headline)
                 .padding(.leading)
             
-            // Example Pie Chart
-            PieChartView(data: expensesViewModel.expenses.filter { $0.amount >= 10 }.map { $0.amount }, labels: expensesViewModel.expenses.filter { $0.amount >= 10 }.map { $0.description })
-                .frame(height: 300)
-                .padding(.horizontal)
+            let groupedExpenses = groupExpensesByCategory()
             
-            // Example Bar Chart
-            BarChartView(data: expensesViewModel.expenses.filter { $0.amount >= 10 }.map { $0.amount }, labels: expensesViewModel.expenses.filter { $0.amount >= 10 }.map { $0.description })
-                .frame(height: 300)
-                .padding(.horizontal)
+            // Pie Chart with grouped data
+            PieChartView(
+                data: groupedExpenses.map { $0.1 },
+                labels: groupedExpenses.map { $0.0 }
+            )
+            .frame(height: 300)
+            .padding(.horizontal)
+            
+            // Bar Chart with grouped data
+            BarChartView(
+                data: groupedExpenses.map { $0.1 },
+                labels: groupedExpenses.map { $0.0 }
+            )
+            .frame(height: 300)
+            .padding(.horizontal)
         }
     }
 }
