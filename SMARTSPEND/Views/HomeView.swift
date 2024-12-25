@@ -65,7 +65,7 @@ struct HomeView: View {
                             .clipped() // S'assure que l'image ne dépasse pas les bords
                         
                         VStack {
-                            Spacer(minLength: 50)
+                            Spacer(minLength: 170)
 
                             BalanceCardView(
                                 totalIncome: incomesViewModel.totalIncome,
@@ -185,51 +185,70 @@ struct BalanceCardView: View {
     var body: some View {
         ZStack {
             Color.navy
-                .cornerRadius(12)
-                .shadow(color: Color.navy.opacity(0.3), radius: 6, x: 0, y: 2)
+                .cornerRadius(20)
+                .shadow(radius: 10)
 
-            VStack(spacing: 8) {
-                Text("Balance")
-                    .font(.headline)
-                    .foregroundColor(.white)
-
-                let balance = totalIncome - totalExpenses
-                Text("\(currencySymbol())\(balance, specifier: "%.2f")")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(balance >= 0 ? .lightGreen : .red)
-
+            VStack(spacing: 20) {
                 HStack {
-                    VStack {
-                        Text("Expenses")
+                    VStack(alignment: .leading) {
+                        Text("Total Balance")
                             .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.8))
+                        let balance = totalIncome - totalExpenses
+                        Text("\(currencySymbol())\(balance, specifier: "%.2f")")
+                            .font(.system(size: 34, weight: .bold))
                             .foregroundColor(.white)
-                        Text("-\(currencySymbol())\(totalExpenses, specifier: "%.2f")")
+                    }
+                    Spacer()
+                    Image(systemName: "creditcard.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                }
+
+                Divider()
+                    .background(Color.white.opacity(0.3))
+
+                HStack(spacing: 40) {
+                    VStack {
+                        HStack {
+                            Circle()
+                                .fill(Color.red.opacity(0.2))
+                                .frame(width: 30, height: 30)
+                                .overlay(
+                                    Image(systemName: "arrow.down")
+                                        .foregroundColor(.red)
+                                )
+                            Text("Expenses")
+                                .foregroundColor(.white)
+                        }
+                        Text("\(currencySymbol())\(totalExpenses, specifier: "%.2f")")
                             .font(.headline)
                             .foregroundColor(.red)
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                    Divider()
-                        .frame(height: 40)
-                        .background(Color.white)
 
                     VStack {
-                        Text("Income")
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                        Text("+\(currencySymbol())\(totalIncome, specifier: "%.2f")")
+                        HStack {
+                            Circle()
+                                .fill(Color.green.opacity(0.2))
+                                .frame(width: 30, height: 30)
+                                .overlay(
+                                    Image(systemName: "arrow.up")
+                                        .foregroundColor(.green)
+                                )
+                            Text("Income")
+                                .foregroundColor(.white)
+                        }
+                        Text("\(currencySymbol())\(totalIncome, specifier: "%.2f")")
                             .font(.headline)
-                            .foregroundColor(.lightGreen)
+                            .foregroundColor(.green)
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .padding(.top, 8)
             }
             .padding()
         }
-        .frame(maxWidth: 350, maxHeight: 200) // Increased card width and height
-        .offset(y: 50) // Lower the card by adding vertical offset
+        .frame(height: 160) // Reduced from 180
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 20) // Adjusted horizontal padding
     }
 }
 
@@ -394,8 +413,8 @@ struct FloatingAddButton: View {
                 .background(Circle().fill(Color.mostImportantColor))
                 .shadow(radius: 10)
         }
-        .padding(.trailing, 30) // Adjust right padding to move horizontally
-        .padding(.bottom, 100) // Adjust bottom padding to move vertically
+        .padding(.trailing, 30)
+        .padding(.bottom, 50) // Changed from 100 to 50 to lower the button position
     }
 }
 
