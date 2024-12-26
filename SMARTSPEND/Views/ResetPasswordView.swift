@@ -113,9 +113,6 @@ struct ResetPasswordView: View {
     }
     
     private func resetPassword() {
-        // Print token for debugging
-        print("Using token: \(token)")
-        
         guard let url = URL(string: "http://localhost:3000/auth/reset-password?token=\(token)") else {
             alertMessage = "Invalid URL"
             showAlert = true
@@ -126,7 +123,7 @@ struct ResetPasswordView: View {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let body = ["newPassword": newPassword] // Changed from "newPassword" to "password"
+        let body = ["newPassword": newPassword]
         
         do {
             let jsonData = try JSONEncoder().encode(body)
