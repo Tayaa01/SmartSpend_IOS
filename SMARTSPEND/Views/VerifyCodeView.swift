@@ -34,7 +34,8 @@ struct OTPTextBox: View {
     @Binding var text: String
     let isCurrentField: Bool
     @FocusState private var isFocused: Bool
-    let nextFocusAction: () -> Void
+    let index: Int
+    @Binding var currentField: Int
     
     var body: some View {
         TextField("", text: $text)
@@ -53,41 +54,38 @@ struct OTPTextBox: View {
                     text = String(newValue.suffix(1))
                 }
                 if let _ = Int(text) {
-                    nextFocusAction()
+                    if index < 5 {
+                        currentField = index + 1
+                    }
                 } else {
                     text = ""
                 }
             }
-            .onChange(of: isCurrentField) { newValue in
-                isFocused = newValue
+            .onTapGesture {
+                currentField = index
+            }
+            .onChange(of: currentField) { newValue in
+                isFocused = (newValue == index)
             }
     }
 }
 
 struct OTPInputView: View {
     @Binding var otpFields: [String]
-    @State private var currentField: Int = 0
+    @Binding var currentField: Int
     
     var body: some View {
         HStack(spacing: 10) {
             ForEach(0..<6) { index in
                 OTPTextBox(
                     text: $otpFields[index],
-                    isCurrentField: currentField == index
-                ) {
-                    if index < 5 {
-                        currentField = index + 1
-                    }
-                }
-                .onTapGesture {
-                    currentField = index
-                }
+                    isCurrentField: currentField == index,
+                    index: index,
+                    currentField: $currentField
+                )
             }
         }
         .padding(.horizontal)
-        .onAppear {
-            currentField = 0
-        }
     }
 }
 
@@ -98,6 +96,7 @@ struct VerifyCodeView: View {
     @State private var alertMessage: String = ""
     @State private var navigateToResetPassword: Bool = false
     @FocusState private var focusedField: Int?
+    @State private var currentField: Int = 0
     
     var verificationCode: String {
         otpFields.joined()
@@ -108,7 +107,7 @@ struct VerifyCodeView: View {
             Spacer()
             HeaderView(email: email)
             
-            OTPInputView(otpFields: $otpFields)
+            OTPInputView(otpFields: $otpFields, currentField: $currentField)
             
             Button("Verify Code") {
                 if verificationCode.count == 6 {
