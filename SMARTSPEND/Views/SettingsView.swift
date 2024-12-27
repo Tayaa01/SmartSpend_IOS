@@ -8,6 +8,7 @@ struct settingsView: View {
     @State private var showPrivacyPolicyView = false
     @State private var showTermsOfServiceView = false
     @State private var showContactUsView = false
+    @State private var showChangePasswordView = false
     @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
 
     var body: some View {
@@ -24,7 +25,9 @@ struct settingsView: View {
                             // Section Profil
                             SettingsSection(title: "Profile", items: [
                                 SettingsItem(title: "My Profile", icon: "person.fill", action: {}),
-                                SettingsItem(title: "Change Password", icon: "key.fill", action: {}),
+                                SettingsItem(title: "Change Password", icon: "key.fill", action: {
+                                    showChangePasswordView = true
+                                }),
                                 SettingsItem(title: "Log out", icon: "arrow.right.circle.fill", action: {
                                     showingLogoutAlert = true
                                 })
@@ -47,6 +50,9 @@ struct settingsView: View {
                             ])
                         }
                         .padding()
+                        .background(
+                            NavigationLink(destination: ChangePasswordView(), isActive: $showChangePasswordView) { EmptyView() }
+                        )
                         .background(
                             NavigationLink(destination: VersionView(), isActive: $showVersionView) { EmptyView() }
                         )

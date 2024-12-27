@@ -97,9 +97,39 @@ struct VerifyCodeView: View {
     @State private var navigateToResetPassword: Bool = false
     @FocusState private var focusedField: Int?
     @State private var currentField: Int = 0
+    @State private var isLoading: Bool = false
     
     var verificationCode: String {
         otpFields.joined()
+    }
+    
+    func verifyToken() async {
+        guard let url = URL(string: "http://localhost:3000/auth/verify-reset-token?token=\(verificationCode)") else {
+            alertMessage = "Invalid URL"
+            showAlert = true
+            return
+        }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(VerifyTokenResponse.self, from: data)
+            
+            DispatchQueue.main.async {
+                if response.isValid {
+                    navigateToResetPassword = true
+                } else {
+                    alertMessage = "Invalid verification code"
+                    showAlert = true
+                }
+                isLoading = false
+            }
+        } catch {
+            DispatchQueue.main.async {
+                alertMessage = "Error verifying code: \(error.localizedDescription)"
+                showAlert = true
+                isLoading = false
+            }
+        }
     }
     
     var body: some View {
@@ -111,19 +141,29 @@ struct VerifyCodeView: View {
             
             Button("Verify Code") {
                 if verificationCode.count == 6 {
-                    navigateToResetPassword = true
+                    isLoading = true
+                    Task {
+                        await verifyToken()
+                    }
                 } else {
                     alertMessage = "Please enter a 6-digit code"
                     showAlert = true
                 }
             }
+            .disabled(isLoading)
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.mostImportantColor)
+            .background(isLoading ? Color.gray : Color.mostImportantColor)
             .foregroundColor(.white)
             .cornerRadius(10)
             .padding(.horizontal, 20)
             .padding(.top, 30)
+            .overlay {
+                if isLoading {
+                    ProgressView()
+                        .tint(.white)
+                }
+            }
             
             NavigationLink(
                 destination: ResetPasswordView(token: verificationCode)
@@ -144,4 +184,8 @@ struct VerifyCodeView: View {
             focusedField = 0
         }
     }
+}
+
+struct VerifyTokenResponse: Codable {
+    let isValid: Bool
 }
