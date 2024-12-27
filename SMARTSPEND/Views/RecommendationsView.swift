@@ -1,69 +1,32 @@
 import SwiftUI
 
+// Add models for the API response
+struct Suggestion: Codable, Identifiable {
+    let category: String
+    let advice: String
+    var id: String { category } // Use category as id since it appears unique
+}
+
+struct RecommendationResponse: Codable {
+    let suggestions: [Suggestion]
+    let user: String
+    let date: String
+    let _id: String
+    let __v: Int
+}
+
 struct RecommendationsView: View {
-    @State private var recommendationText: String = "Loading recommendations..."
-    @State private var errorMessage: String? = nil
-    
-    // Get the current date in yyyy/MM format
-    func getCurrentPeriod() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy/MM"
-        return dateFormatter.string(from: Date())
-    }
-    
-    // Fetch recommendations for the connected user
-    func fetchRecommendations() {
-        guard let token = UserDefaults.standard.string(forKey: "access_token") else {
-            self.errorMessage = "User token not found."
-            self.recommendationText = "Unable to load recommendations."
-            return
-        }
-        
-        // Construct the URL with the current month and year
-        let period = getCurrentPeriod()
-        let urlString = "http://localhost:3000/recommendations/generate?userToken=\(token)&period=\(period)"
-        guard let url = URL(string: urlString) else {
-            self.errorMessage = "Invalid URL."
-            self.recommendationText = "Unable to load recommendations."
-            return
-        }
-        
-        // Perform the request
-        URLSession.shared.dataTask(with: URLRequest(url: url)) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.errorMessage = "Error: \(error.localizedDescription)"
-                    self.recommendationText = "Unable to load recommendations."
-                    return
-                }
-                
-                guard let data = data else {
-                    self.errorMessage = "No data received."
-                    self.recommendationText = "Unable to load recommendations."
-                    return
-                }
-                
-                do {
-                    // Decode the response
-                    let decodedResponse = try JSONDecoder().decode(RecommendationResponse.self, from: data)
-                    self.recommendationText = decodedResponse.recommendationText
-                } catch {
-                    self.errorMessage = "Failed to decode response."
-                    self.recommendationText = "Unable to load recommendations."
-                }
-            }
-        }.resume()
-    }
+    @StateObject private var viewModel = RecommendationsViewModel()
     
     var body: some View {
         NavigationView {
             ZStack {
                 // Background
                 LinearGradient(gradient: Gradient(colors: [.sand, .sand.opacity(0.6)]),
-                               startPoint: .topLeading,
-                               endPoint: .bottomTrailing)
+                             startPoint: .topLeading,
+                             endPoint: .bottomTrailing)
                     .ignoresSafeArea()
-
+                
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Recommended Actions")
                         .font(.largeTitle)
@@ -71,44 +34,51 @@ struct RecommendationsView: View {
                         .foregroundColor(.mostImportantColor)
                         .padding(.top, 30)
                         .padding(.horizontal)
-
-                    ScrollView {
-                        VStack(spacing: 15) {
-                            // Example recommendation card
-                            RecommendationCard(
-                                title: "Reduce Dining Out",
-                                message: "Cut back on restaurant expenses by cooking at home more often.",
-                                color: .teal
-                            )
-                            RecommendationCard(
-                                title: "Cancel Unused Subscriptions",
-                                message: "Review all your monthly subscriptions and cancel those you barely use.",
-                                color: .navy
-                            )
-                            RecommendationCard(
-                                title: "Use Cashback Apps",
-                                message: "Try cashback or coupon apps to save on regular purchases.",
-                                color: .red
-                            )
-                            RecommendationCard(
-                                title: "Consider Carpooling",
-                                message: "Share rides for daily commutes to save on fuel and maintenance costs.",
-                                color: .leastImportantColor
-                            )
-                            // ...existing code or more cards...
+                    
+                    if viewModel.isLoading {
+                        ProgressView("Loading recommendations...")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if let error = viewModel.errorMessage {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .padding()
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 15) {
+                                ForEach(viewModel.recommendations) { suggestion in
+                                    RecommendationCard(
+                                        title: suggestion.category,
+                                        message: suggestion.advice,
+                                        color: getColorForCategory(suggestion.category)
+                                    )
+                                }
+                            }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                     }
                 }
             }
             .navigationBarTitle("Recommendations", displayMode: .inline)
+            .onAppear {
+                viewModel.fetchRecommendations()
+            }
         }
     }
-}
-
-// Decodable structure for API response
-struct RecommendationResponse: Decodable {
-    let recommendationText: String
+    
+    private func getColorForCategory(_ category: String) -> Color {
+        switch category {
+        case "Expense Management":
+            return .teal // Use our custom teal color
+        case "Debt Reduction":
+            return .red // Use our custom red color
+        case "Emergency Fund":
+            return .navy // Use our custom navy color
+        case "Financial Planning":
+            return .mostImportantColor // Use our custom mostImportantColor
+        default:
+            return .leastImportantColor // Use our custom leastImportantColor
+        }
+    }
 }
 
 struct RecommendationCard: View {
