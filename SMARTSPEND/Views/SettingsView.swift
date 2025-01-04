@@ -8,6 +8,8 @@ struct settingsView: View {
     @State private var showPrivacyPolicyView = false
     @State private var showTermsOfServiceView = false
     @State private var showContactUsView = false
+    @State private var showChangePasswordView = false
+    @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
 
     var body: some View {
         NavigationView {
@@ -17,10 +19,15 @@ struct settingsView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 20) {
+                            // Currency Picker
+                            currencyPicker()
+                            
                             // Section Profil
                             SettingsSection(title: "Profile", items: [
                                 SettingsItem(title: "My Profile", icon: "person.fill", action: {}),
-                                SettingsItem(title: "Change Password", icon: "key.fill", action: {}),
+                                SettingsItem(title: "Change Password", icon: "key.fill", action: {
+                                    showChangePasswordView = true
+                                }),
                                 SettingsItem(title: "Log out", icon: "arrow.right.circle.fill", action: {
                                     showingLogoutAlert = true
                                 })
@@ -43,6 +50,9 @@ struct settingsView: View {
                             ])
                         }
                         .padding()
+                        .background(
+                            NavigationLink(destination: ChangePasswordView(), isActive: $showChangePasswordView) { EmptyView() }
+                        )
                         .background(
                             NavigationLink(destination: VersionView(), isActive: $showVersionView) { EmptyView() }
                         )
@@ -75,6 +85,27 @@ struct settingsView: View {
 
     private func logout() {
         isLoggedOut = true
+    }
+    
+    private func currencyPicker() -> some View {
+        VStack(alignment: .leading) {
+            Text("Select Currency")
+                .font(.headline)
+                .padding(.leading)
+            
+            Picker("Currency", selection: $selectedCurrency) {
+                Text("USD").tag("USD")
+                Text("EUR").tag("EUR")
+                Text("GBP").tag("GBP")
+                // Add more currencies as needed
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.horizontal)
+        }
+        .padding()
+        .background(Color.white.opacity(0.9))
+        .cornerRadius(15)
+        .shadow(color: .gray.opacity(0.2), radius: 10, x: 0, y: 5)
     }
 }
 

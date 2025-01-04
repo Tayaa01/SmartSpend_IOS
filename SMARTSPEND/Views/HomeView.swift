@@ -50,6 +50,7 @@ struct HomeView: View {
     @StateObject private var expensesViewModel = ExpensesViewModel()
     @StateObject private var incomesViewModel = IncomesViewModel()
     @State private var showAddExpenseOrIncome: Bool = false
+    @AppStorage("selectedCurrency") private var selectedCurrency: String = "USD"
 
     var body: some View {
         NavigationView {
@@ -64,11 +65,12 @@ struct HomeView: View {
                             .clipped() // S'assure que l'image ne dépasse pas les bords
                         
                         VStack {
-                            Spacer(minLength: 50)
+                            Spacer(minLength: 170)
 
                             BalanceCardView(
                                 totalIncome: incomesViewModel.totalIncome,
-                                totalExpenses: expensesViewModel.totalExpenses
+                                totalExpenses: expensesViewModel.totalExpenses,
+                                currency: selectedCurrency
                             )
                             .padding(16.0)
                         }
@@ -95,8 +97,8 @@ struct HomeView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
                                 ForEach(expensesViewModel.expenses.prefix(3)) { expense in
-                                    ExpenseCard(expense: expense)
-                                        .frame(width: UIScreen.main.bounds.width * 0.8)
+                                    ExpenseCard(expense: expense, currency: selectedCurrency)
+                                        .frame(width: UIScreen.main.bounds.width * 0.9)
                                         .padding(.horizontal)
                                 }
                             }
@@ -124,8 +126,8 @@ struct HomeView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
                                 ForEach(incomesViewModel.incomes.prefix(3)) { income in
-                                    IncomeCard(income: income)
-                                        .frame(width: UIScreen.main.bounds.width * 0.8)
+                                    IncomeCard(income: income, currency: selectedCurrency)
+                                        .frame(width: UIScreen.main.bounds.width * 0.9)
                                         .padding(.horizontal)
                                 }
                             }
@@ -165,61 +167,95 @@ struct HomeView: View {
 struct BalanceCardView: View {
     var totalIncome: Double
     var totalExpenses: Double
+    var currency: String
+
+    private func currencySymbol() -> String {
+        switch currency {
+        case "USD":
+            return "$"
+        case "EUR":
+            return "€"
+        case "GBP":
+            return "£"
+        default:
+            return "$"
+        }
+    }
 
     var body: some View {
         ZStack {
             Color.navy
-                .cornerRadius(12)
-                .shadow(color: Color.navy.opacity(0.3), radius: 6, x: 0, y: 2)
+                .cornerRadius(20)
+                .shadow(radius: 10)
 
-            VStack(spacing: 8) {
-                Text("Balance")
-                    .font(.headline)
-                    .foregroundColor(.white)
-
-                let balance = totalIncome - totalExpenses
-                Text("$\(balance, specifier: "%.2f")")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(balance >= 0 ? .lightGreen : .red)
-
+            VStack(spacing: 20) {
                 HStack {
-                    VStack {
-                        Text("Expenses")
+                    VStack(alignment: .leading) {
+                        Text("Total Balance")
                             .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.8))
+                        let balance = totalIncome - totalExpenses
+                        Text("\(currencySymbol())\(balance, specifier: "%.2f")")
+                            .font(.system(size: 34, weight: .bold))
                             .foregroundColor(.white)
-                        Text("-$\(totalExpenses, specifier: "%.2f")")
+                    }
+                    Spacer()
+                    Image(systemName: "creditcard.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                }
+
+                Divider()
+                    .background(Color.white.opacity(0.3))
+
+                HStack(spacing: 40) {
+                    VStack {
+                        HStack {
+                            Circle()
+                                .fill(Color.red.opacity(0.2))
+                                .frame(width: 30, height: 30)
+                                .overlay(
+                                    Image(systemName: "arrow.down")
+                                        .foregroundColor(.red)
+                                )
+                            Text("Expenses")
+                                .foregroundColor(.white)
+                        }
+                        Text("\(currencySymbol())\(totalExpenses, specifier: "%.2f")")
                             .font(.headline)
                             .foregroundColor(.red)
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                    Divider()
-                        .frame(height: 40)
-                        .background(Color.white)
 
                     VStack {
-                        Text("Income")
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                        Text("+$\(totalIncome, specifier: "%.2f")")
+                        HStack {
+                            Circle()
+                                .fill(Color.green.opacity(0.2))
+                                .frame(width: 30, height: 30)
+                                .overlay(
+                                    Image(systemName: "arrow.up")
+                                        .foregroundColor(.green)
+                                )
+                            Text("Income")
+                                .foregroundColor(.white)
+                        }
+                        Text("\(currencySymbol())\(totalIncome, specifier: "%.2f")")
                             .font(.headline)
-                            .foregroundColor(.lightGreen)
+                            .foregroundColor(.green)
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .padding(.top, 8)
             }
             .padding()
         }
-        .frame(maxWidth: 300, maxHeight: 180) // Increased card width and height
-        .offset(y: 50) // Lower the card by adding vertical offset
+        .frame(height: 160) // Reduced from 180
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 20) // Adjusted horizontal padding
     }
 }
 
 // ExpenseCard
 struct ExpenseCard: View {
     var expense: Expense
+    var currency: String
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -232,13 +268,26 @@ struct ExpenseCard: View {
         formatter.dateFormat = "yyyy-MM-dd"  // Assurez-vous que la date soit dans ce format
         
         if let date = formatter.date(from: string) {
-            return dateFormatter.string(from: date)  // Retourne la date formatée
+            return dateFormatter.string(from: date).prefix(10).description  // Retourne les 10 premiers caractères de la date formatée
         }
-        return string  // Si la conversion échoue, retourne la chaîne d'origine
+        return string.prefix(10).description  // Si la conversion échoue, retourne les 10 premiers caractères de la chaîne d'origine
+    }
+    
+    private func currencySymbol() -> String {
+        switch currency {
+        case "USD":
+            return "$"
+        case "EUR":
+            return "€"
+        case "GBP":
+            return "£"
+        default:
+            return "$"
+        }
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "tag.fill")
                     .font(.title)
@@ -247,7 +296,7 @@ struct ExpenseCard: View {
                     .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
                     .padding(.trailing, 10)
                 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(expense.description)
                         .font(.headline)
                         .foregroundColor(.black)
@@ -261,7 +310,7 @@ struct ExpenseCard: View {
                 
                 Spacer()
                 
-                Text("$\(expense.amount, specifier: "%.2f")")
+                Text("\(currencySymbol())\(expense.amount, specifier: "%.2f")")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.red)
@@ -280,6 +329,7 @@ struct ExpenseCard: View {
 // IncomeCard
 struct IncomeCard: View {
     var income: Income
+    var currency: String
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -292,13 +342,26 @@ struct IncomeCard: View {
         formatter.dateFormat = "yyyy-MM-dd"  // Assurez-vous que la date soit dans ce format
         
         if let date = formatter.date(from: string) {
-            return dateFormatter.string(from: date)  // Retourne la date formatée
+            return dateFormatter.string(from: date).prefix(10).description  // Retourne les 10 premiers caractères de la date formatée
         }
-        return string  // Si la conversion échoue, retourne la chaîne d'origine
+        return string.prefix(10).description  // Si la conversion échoue, retourne les 10 premiers caractères de la chaîne d'origine
+    }
+    
+    private func currencySymbol() -> String {
+        switch currency {
+        case "USD":
+            return "$"
+        case "EUR":
+            return "€"
+        case "GBP":
+            return "£"
+        default:
+            return "$"
+        }
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "dollarsign.circle.fill")
                     .font(.title)
@@ -307,7 +370,7 @@ struct IncomeCard: View {
                     .background(Circle().fill(Color.mostImportantColor.opacity(0.2))) // Icône arrondie avec fond coloré
                     .padding(.trailing, 10)
                 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(income.description)
                         .font(.headline)
                         .foregroundColor(.black)
@@ -321,7 +384,7 @@ struct IncomeCard: View {
                 
                 Spacer()
                 
-                Text("$\(income.amount, specifier: "%.2f")")
+                Text("\(currencySymbol())\(income.amount, specifier: "%.2f")")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.green)
@@ -350,8 +413,8 @@ struct FloatingAddButton: View {
                 .background(Circle().fill(Color.mostImportantColor))
                 .shadow(radius: 10)
         }
-        .padding(.trailing, 30) // Adjust right padding to move horizontally
-        .padding(.bottom, 100) // Adjust bottom padding to move vertically
+        .padding(.trailing, 30)
+        .padding(.bottom, 50) // Changed from 100 to 50 to lower the button position
     }
 }
 

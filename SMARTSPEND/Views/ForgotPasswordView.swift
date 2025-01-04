@@ -4,6 +4,8 @@ struct ForgotPasswordView: View {
     @State private var email: String = "" // Bind to capture the email input
     @State private var showAlert: Bool = false // Track alert state
     @State private var alertMessage: String = "" // Custom message for the alert
+    @State private var navigateToVerifyCode: Bool = false // Add this
+    @State private var isRequestSuccessful: Bool = false // Add this
 
     // Déclaration des couleurs
     static let mostImportantColor = Color(red: 47 / 255, green: 126 / 255, blue: 121 / 255)
@@ -72,8 +74,16 @@ struct ForgotPasswordView: View {
                     Alert(
                         title: Text("Forgot Password"),
                         message: Text(alertMessage),
-                        dismissButton: .default(Text("OK"))
+                        dismissButton: .default(Text("OK")) {
+                            if isRequestSuccessful {
+                                navigateToVerifyCode = true
+                            }
+                        }
                     )
+                }
+
+                NavigationLink(destination: VerifyCodeView(email: email), isActive: $navigateToVerifyCode) {
+                    EmptyView()
                 }
 
                 Spacer()
@@ -93,7 +103,7 @@ struct ForgotPasswordView: View {
     }
 
     private func sendForgotPasswordRequest() {
-        guard let url = URL(string: "http://localhost:3005/auth/forgot-password") else {
+        guard let url = URL(string: "http://localhost:3000/auth/forgot-password") else {
             alertMessage = "Invalid URL."
             showAlert = true
             return
@@ -117,15 +127,18 @@ struct ForgotPasswordView: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 if let error = error {
+                    isRequestSuccessful = false
                     alertMessage = "Error: \(error.localizedDescription)"
                     showAlert = true
                     return
                 }
 
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 {
-                    alertMessage = "A reset link has been sent to \(email). Please check your email."
+                    isRequestSuccessful = true
+                    alertMessage = "Reset code has been sent to your email"
                     showAlert = true
                 } else {
+                    isRequestSuccessful = false
                     alertMessage = "Failed to send reset link. Please try again."
                     showAlert = true
                 }
