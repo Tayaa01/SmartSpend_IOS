@@ -84,6 +84,12 @@ struct settingsView: View {
     }
 
     private func logout() {
+        // Clear all authentication related data
+        UserDefaults.standard.removeObject(forKey: "access_token")
+        UserDefaults.standard.removeObject(forKey: "token_timestamp")
+        UserDefaults.standard.removeObject(forKey: "saved_username")
+        UserDefaults.standard.removeObject(forKey: "saved_password")
+        
         isLoggedOut = true
     }
     
